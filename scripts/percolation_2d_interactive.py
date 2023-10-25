@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.colors as colors
 from random import uniform
 from scipy.ndimage import label
 from matplotlib.widgets import Slider, Button
@@ -86,7 +85,7 @@ class Percolation_2D():
     
 if __name__ == '__main__':
     
-    p = 0.618  #transition prob
+    p = 0.59274621  #transition prob
     size = 1000
     plt.ion()
     fig, (ax1,ax2) = plt.subplots(1,2, sharey=True)    #plot 
@@ -97,7 +96,7 @@ if __name__ == '__main__':
     ax_reset = fig.add_axes([0.8, 0.025, 0.1, 0.04])
     
     prob_slider = Slider(ax=ax_prob, label='Probability',
-                         valmin=0.575, valmax=0.615, valinit=p)
+                         valmin=0.575, valmax=0.625, valinit=p)
     button = Button(ax_reset, 'Reset', hovercolor='0.975')
         
     lattice_1 = Percolation_2D.lattice_rand(prob_slider.val, size)         #generate lattice
