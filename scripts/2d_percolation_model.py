@@ -67,9 +67,15 @@ if __name__ == '__main__':
     p = 0.59274621  #transition prob
     size = 1000
     
+<<<<<<< Updated upstream
     lattice_1 = lattice_random(p, size)             #generate lattice
     labeled_lattice_1 = cluster_search(lattice_1)           #label lattice
     max_cluster_1 = max_cluster(labeled_lattice_1, size)    #find max cluster
+=======
+    lattice_1 = Percolation_2D.lattice_rand(p, size)             #generate lattice
+    labeled_lattice_1 = Percolation_2D.cluster_search(lattice_1)           #label lattice
+    max_cluster_1 = Percolation_2D.max_cluster(labeled_lattice_1, size)    #find max cluster
+>>>>>>> Stashed changes
     
     fig, (ax1,ax2) = plt.subplots(1,2, sharey=True)    #plot 
     ax1.imshow(labeled_lattice_1, cmap="viridis")
