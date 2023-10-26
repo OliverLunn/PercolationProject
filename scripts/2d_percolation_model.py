@@ -2,12 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from random import uniform
 from scipy.ndimage import label
-
 class Percolation_2D():
     """
     Class contiaing functions for simulating 2 dimensional percolation transitions
     """
-    def lattice_rand(p, size):
+    def lattice_random(p, size):
+        
         """
         generates a 2d lattice of randomly distributed numbers 0 < x < 1.
         A random number < probability is the condition for occupation of a site
@@ -21,14 +21,15 @@ class Percolation_2D():
         """
         
         rows, columns = size, size
-    
+
         lattice = [[0 for i in range(rows)] for j in range(columns)]
         for i in range(rows):
             for j in range(columns):
                 lattice[i][j] = uniform(0,1) <= p
+        
         return lattice
-    
-    
+
+
     def cluster_search(lattice):
         """
         Searches lattice array of occupied sites for clusters.
@@ -38,7 +39,7 @@ class Percolation_2D():
             
         Returns:
             labeled_lattice : lattice with individual clusters labelled 
-    
+
         """
         labeled_lattice, num = label(lattice)
         return labeled_lattice    
@@ -53,6 +54,7 @@ class Percolation_2D():
             
         Returns:
             lmax_cluster : lattice with only max cluster [2d array] 
+
         """
         
         count = np.bincount(np.reshape(lattice, size*size))
