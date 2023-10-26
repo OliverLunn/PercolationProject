@@ -2,12 +2,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 from random import uniform
 from scipy.ndimage import label
+from matplotlib.widgets import Slider, Button
 
 class Percolation_2D():
     """
     Class contiaing functions for simulating 2 dimensional percolation transitions
     """
     def lattice_rand(p, size):
+        
         """
         generates a 2d lattice of randomly distributed numbers 0 < x < 1.
         A random number < probability is the condition for occupation of a site
@@ -26,6 +28,7 @@ class Percolation_2D():
         for i in range(rows):
             for j in range(columns):
                 lattice[i][j] = uniform(0,1) <= p
+        
         return lattice
     
     
@@ -53,6 +56,7 @@ class Percolation_2D():
             
         Returns:
             lmax_cluster : lattice with only max cluster [2d array] 
+    
         """
         
         count = np.bincount(np.reshape(lattice, size*size))
@@ -61,21 +65,49 @@ class Percolation_2D():
         max_cluster = np.where(lattice == max_cluster_id,1,0)
         
         return max_cluster
-
-
-if __name__ == '__main__':
-    p = 0.59274621  #transition prob
-    size = 100
     
-    lattice_1 = Percolation_2D.lattice_random(p, size)             #generate lattice
+    def update_lattice(val):
+        
+        p = prob_slider.val
+        ax1.cla()
+        ax2.cla()
+        
+        lattice_1 = Percolation_2D.lattice_rand(p, size)             #generate lattice
+        labeled_lattice_1 = Percolation_2D.cluster_search(lattice_1)           #label lattice
+        max_cluster_1 = Percolation_2D.max_cluster(labeled_lattice_1, size)    #find max cluster
+        
+        ax1.imshow(labeled_lattice_1)
+        ax2.imshow(max_cluster_1, cmap="binary")
+        
+    def reset(event):
+        prob_slider.reset()
+
+    
+if __name__ == '__main__':
+    
+    p = 0.59274621  #transition prob
+    size = 1000
+    plt.ion()
+    fig, (ax1,ax2) = plt.subplots(1,2, sharey=True)    #plot 
+    plt.subplots_adjust(bottom=0.35)
+
+    # Make a horizontal slider to control the probability (button to reset to crit prob)
+    ax_prob = fig.add_axes([0.25, 0.1, 0.65, 0.03])
+    ax_reset = fig.add_axes([0.8, 0.025, 0.1, 0.04])
+    
+    prob_slider = Slider(ax=ax_prob, label='Probability',
+                         valmin=0.575, valmax=0.625, valinit=p)
+    button = Button(ax_reset, 'Reset', hovercolor='0.975')
+        
+    lattice_1 = Percolation_2D.lattice_rand(prob_slider.val, size)         #generate lattice
     labeled_lattice_1 = Percolation_2D.cluster_search(lattice_1)           #label lattice
     max_cluster_1 = Percolation_2D.max_cluster(labeled_lattice_1, size)    #find max cluster
+        
+    ax1.imshow(labeled_lattice_1)
+    ax2.imshow(max_cluster_1, cmap="binary")
     
-    fig = plt.figure()    #plot 
-    ax1 = plt.axes()
-    y_occupied,x_occupied = np.nonzero(lattice_1)
-    ax1.scatter(x_occupied,y_occupied,color='black',s=0.2)
-    
-    ax1.imshow(max_cluster_1, cmap="binary")
-    
+    prob_slider.on_changed(Percolation_2D.update_lattice)
+    button.on_clicked(Percolation_2D.reset)
+
     plt.show()
+    
