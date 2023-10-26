@@ -18,10 +18,10 @@ class Percolation_2D():
                 only ave capabiity for square lattice currently
         Returns:
             lattice : array of occupied/non-occupied sites
-        -------
         """
         
         rows, columns = size, size
+
         lattice = [[0 for i in range(rows)] for j in range(columns)]
         for i in range(rows):
             for j in range(columns):
@@ -71,9 +71,11 @@ if __name__ == '__main__':
     labeled_lattice_1 = Percolation_2D.cluster_search(lattice_1)           #label lattice
     max_cluster_1 = Percolation_2D.max_cluster(labeled_lattice_1, size)    #find max cluster
     
-    fig, (ax1,ax2) = plt.subplots(1,2, sharey=True)    #plot 
-    ax1.imshow(labeled_lattice_1, cmap="viridis")
-    ax2.imshow(max_cluster_1, cmap="binary")
+    fig = plt.figure()    #plot 
+    ax1 = plt.axes()
+    y_occupied,x_occupied = np.nonzero(lattice_1)
+    ax1.scatter(x_occupied,y_occupied,color='black',s=0.005)
+    
+    ax1.imshow(max_cluster_1, cmap="binary")
     
     plt.show()
-    
