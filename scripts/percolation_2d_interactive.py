@@ -86,8 +86,8 @@ class Percolation_2D():
 if __name__ == '__main__':
     
     p = 0.59274621  #transition prob
-    size = 1000
-    plt.ion()
+    size = 100
+
     fig, (ax1,ax2) = plt.subplots(1,2, sharey=True)    #plot 
     plt.subplots_adjust(bottom=0.35)
 
