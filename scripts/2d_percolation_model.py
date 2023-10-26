@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from random import uniform
 from scipy.ndimage import label
+
 class Percolation_2D():
     """
     Class contiaing functions for simulating 2 dimensional percolation transitions
@@ -67,7 +68,7 @@ class Percolation_2D():
 
 if __name__ == '__main__':
     p = 0.59274621  #transition prob
-    size = 100
+    size = 1000
     
     lattice_1 = Percolation_2D.lattice_random(p, size)             #generate lattice
     labeled_lattice_1 = Percolation_2D.cluster_search(lattice_1)           #label lattice
@@ -76,7 +77,7 @@ if __name__ == '__main__':
     fig = plt.figure()    #plot 
     ax1 = plt.axes()
     y_occupied,x_occupied = np.nonzero(lattice_1)
-    ax1.scatter(x_occupied,y_occupied,color='black',s=0.2)
+    ax1.scatter(x_occupied,y_occupied,color='black',s=0.005)
     
     ax1.imshow(max_cluster_1, cmap="binary")
     
