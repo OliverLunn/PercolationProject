@@ -18,7 +18,6 @@ class Percolation_2D():
                 only ave capabiity for square lattice currently
         Returns:
             lattice : array of occupied/non-occupied sites
-        -------
         """
         
         rows, columns = size, size
@@ -40,7 +39,6 @@ class Percolation_2D():
             
         Returns:
             labeled_lattice : lattice with individual clusters labelled 
-
         """
         labeled_lattice, num = label(lattice)
         return labeled_lattice    
@@ -55,7 +53,6 @@ class Percolation_2D():
             
         Returns:
             lmax_cluster : lattice with only max cluster [2d array] 
-
         """
         
         count = np.bincount(np.reshape(lattice, size*size))
