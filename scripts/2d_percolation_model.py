@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-
 from random import uniform
 from scipy.ndimage import label
 
@@ -23,7 +22,6 @@ class Percolation_2D():
         """
         
         rows, columns = size, size
-
         lattice = [[0 for i in range(rows)] for j in range(columns)]
         for i in range(rows):
             for j in range(columns):
@@ -41,7 +39,6 @@ class Percolation_2D():
             
         Returns:
             labeled_lattice : lattice with individual clusters labelled 
-
         """
         labeled_lattice, num = label(lattice)
         return labeled_lattice    
@@ -56,7 +53,6 @@ class Percolation_2D():
             
         Returns:
             lmax_cluster : lattice with only max cluster [2d array] 
-
         """
         
         count = np.bincount(np.reshape(lattice, size*size))
