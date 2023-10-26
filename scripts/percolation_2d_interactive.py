@@ -67,7 +67,9 @@ class Percolation_2D():
         return max_cluster
     
     def update_lattice(val):
-        
+        """"
+        Function to update the plots when slider changes.
+        """
         p = prob_slider.val
         ax1.cla()
         ax2.cla()
@@ -75,10 +77,12 @@ class Percolation_2D():
         lattice_1 = Percolation_2D.lattice_rand(p, size)             #generate lattice
         labeled_lattice_1 = Percolation_2D.cluster_search(lattice_1)           #label lattice
         max_cluster_1 = Percolation_2D.max_cluster(labeled_lattice_1, size)    #find max cluster
-        
-        ax1.imshow(labeled_lattice_1)
+        #plot
+        y_occupied,x_occupied = np.nonzero(lattice_1)
+        ax1.scatter(x_occupied,y_occupied,color='black',s=0.2)
+        ax1.imshow(max_cluster_1, cmap="binary")
         ax2.imshow(max_cluster_1, cmap="binary")
-        
+
     def reset(event):
         prob_slider.reset()
 
@@ -102,12 +106,15 @@ if __name__ == '__main__':
     lattice_1 = Percolation_2D.lattice_rand(prob_slider.val, size)         #generate lattice
     labeled_lattice_1 = Percolation_2D.cluster_search(lattice_1)           #label lattice
     max_cluster_1 = Percolation_2D.max_cluster(labeled_lattice_1, size)    #find max cluster
-        
-    ax1.imshow(labeled_lattice_1)
+
     ax2.imshow(max_cluster_1, cmap="binary")
     
     prob_slider.on_changed(Percolation_2D.update_lattice)
     button.on_clicked(Percolation_2D.reset)
 
+    y_occupied,x_occupied = np.nonzero(lattice_1)
+    ax1.scatter(x_occupied,y_occupied,color='black',s=0.2)
+    
+    ax1.imshow(max_cluster_1, cmap="binary")
     plt.show()
     

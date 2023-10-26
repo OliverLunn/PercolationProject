@@ -7,6 +7,9 @@ class Percolation_2D():
     """
     Class contiaing functions for simulating 2 dimensional percolation transitions
     """
+    def __init__(self) -> None:
+        pass
+    
     def lattice_random(p, size):
         
         """
