@@ -118,12 +118,22 @@ class Percolation_2D:
 
 if __name__ == '__main__':
 
-    p = 0.5  #transition prob
-    size = 900
+    p = 0.59274605079210  #transition prob
+    size = 300
     b = 3 #normalization scaling value
     difference = 1
 
+    fig, (ax1,ax2,ax3) = plt.subplots(1,3)
+    gen = Percolation_2D(size,p)
+    lattice, max_cluster = gen.generate()
+    scaled_lattice = gen.coarse_graining(b, lattice)
+    scaled_lattice1 = gen.coarse_graining(b, scaled_lattice)
+
+    ax1.imshow(lattice, cmap="binary")
+    ax2.imshow(scaled_lattice, cmap="binary")
+    ax3.imshow(scaled_lattice1, cmap="binary")
     #shooting method for determining the critical probability of the percolation transition.
+    """
     while difference > 0.0001:
 
         gen = Percolation_2D(size,p)
@@ -143,6 +153,6 @@ if __name__ == '__main__':
         
         difference = delta_23
     print("Threshold reached : ", p)
-    print("Diffence :", delta_23, ratio2, ratio3)
+    """
 
     plt.show()
