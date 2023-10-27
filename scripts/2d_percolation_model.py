@@ -35,7 +35,8 @@ class Percolation_2D:
         for i in range(rows):
             for j in range(columns):
                 lattice[i][j] = uniform(0,1) <= self.p
-        
+        lattice = np.array(lattice) 
+        lattice = np.where(lattice==0, -1, 1)
         return lattice
 
 
@@ -50,6 +51,7 @@ class Percolation_2D:
             labeled_lattice : lattice with individual clusters labelled 
 
         """
+        lattice = np.where(lattice==-1, 0, 1)
         labeled_lattice, num = ndimage.label(lattice)
         return labeled_lattice    
         
@@ -64,7 +66,6 @@ class Percolation_2D:
             max_cluster : lattice with only max cluster [2d array] 
 
         """
-        
         count = np.bincount(np.reshape(lattice, self.size*self.size))
         count[0] = 0
         max_cluster_id = np.argmax(count)
@@ -81,14 +82,46 @@ class Percolation_2D:
         labeled_lattice = self.cluster_search(lattice)           #label lattice
         max_cluster = self.max_cluster(labeled_lattice)    #find max cluster
 
-        return lattice,max_cluster
+        return lattice, max_cluster
+    
+    def coarse_graining(self, b, lattice):
+        """
+        This function implements a majority rule coarse graining transformation on a lattice of N x N dimensions.
+        Inputs:
+            b : transformation scaling factor (multiple of 3) [type : Int]
+            lattice : an array of lattice values [type: numpy array]
+
+        Returns: 
+        scaled_lattice : transformed lattice [type : numpy array]
+
+        """
+        size = len(lattice[0,:])
+        scaled_lattice = np.zeros((int(size/b),int(size/b)))
+        i_new = 0
+        for i in range(1,size-1,b):
+            j_new = 0
+            for j in range(1,size-1,b):
+                lattice1 = lattice[i-1:i+2,j-1:j+2]
+                norm_lattice = np.sign(np.mean(lattice1))
+                scaled_lattice[i_new,j_new] = norm_lattice
+                j_new +=1
+            i_new+=1
+        return scaled_lattice
+    
+    def occupied_ratio(self, lattice):
+
+        occupied = np.count_nonzero(lattice==1)
+        non_occupied = np.count_nonzero(lattice==-1)
+        ratio = int(occupied)/int(non_occupied)
+
+        return ratio
 
 
 def f(x,a,c):
     return a*x + c
 
 if __name__ == '__main__':
-    p = 0.59274621  #transition prob
+    p = 0.4999 #transition prob
     size = 100
 
     gen = Percolation_2D(size,p)
@@ -96,8 +129,9 @@ if __name__ == '__main__':
     
     fig = plt.figure()    #plot 
     ax1 = plt.axes()
-    y_occupied,x_occupied = np.nonzero(lattice)
+
+    y_occupied,x_occupied = np.where(lattice==1)
     ax1.scatter(x_occupied,y_occupied,color='black',s=0.005)
     ax1.imshow(max_cluster, cmap="binary")
-    
+
     plt.show()

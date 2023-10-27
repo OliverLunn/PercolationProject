@@ -121,19 +121,28 @@ if __name__ == '__main__':
     p = 0.5  #transition prob
     size = 900
     b = 3 #normalization scaling value
+    difference = 1
 
-    gen = Percolation_2D(size,p)
-    lattice, max_cluster = gen.generate()    #generate lattice
-    scaled_lattice = gen.coarse_graining(b,lattice)
-    scaled_lattice1 = gen.coarse_graining(b,scaled_lattice)
-    fig, (ax1,ax2,ax3) = plt.subplots(1,3)
+    #shooting method for determining the critical probability of the percolation transition.
+    while difference > 0.0001:
 
-    ax1.imshow(lattice, cmap="binary")
-    ax2.imshow(scaled_lattice, cmap="binary")
-    ax3.imshow(scaled_lattice1, cmap="binary")
+        gen = Percolation_2D(size,p)
+        lattice, max_cluster = gen.generate()
+        scaled_lattice = gen.coarse_graining(b, lattice)
+        scaled_lattice1 = gen.coarse_graining(b, scaled_lattice)
 
-    occ_ratio = gen.occupied_ratio(lattice)
-    occ_ratio1 = gen.occupied_ratio(scaled_lattice)
-    occ_ratio2 = gen.occupied_ratio(scaled_lattice1)
-    print(occ_ratio, occ_ratio1, occ_ratio2)
+        ratio1, ratio2, ratio3 = gen.occupied_ratio(lattice), gen.occupied_ratio(scaled_lattice), gen.occupied_ratio(scaled_lattice1)
+        delta_23 = abs(ratio2 - ratio3)
+
+        if delta_23 > 0.001 and ratio3 < 1:
+            p += 0.00005
+            print("Prob increase")
+        if delta_23 > 0.001 and ratio3 > 1:
+            p -= 0.00005
+            print("Prob decreased")
+        
+        difference = delta_23
+    print("Threshold reached : ", p)
+    print("Diffence :", delta_23, ratio2, ratio3)
+
     plt.show()
