@@ -51,6 +51,7 @@ class Percolation_2D:
             labeled_lattice : lattice with individual clusters labelled 
 
         """
+        lattice = np.where(lattice==-1, 0, 1)
         labeled_lattice, num = ndimage.label(lattice)
         return labeled_lattice    
         
