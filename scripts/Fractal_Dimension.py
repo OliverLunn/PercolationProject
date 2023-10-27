@@ -63,7 +63,7 @@ class Percolation_2D:
             lattice : lattice of occupied/non-occupied sites [2d array]
             
         Returns:
-            lmax_cluster : lattice with only max cluster [2d array] 
+            max_cluster : lattice with only max cluster [2d array] 
 
         """
         
@@ -76,7 +76,7 @@ class Percolation_2D:
     
     def generate(self):
         """
-        
+        Function that generates a lattice and finds the maxium cluster size within the lattice
         
         """
         lattice = self.lattice_random()             #generate lattice
@@ -96,6 +96,7 @@ if __name__ == '__main__':
     size = 500
     dimensions = np.zeros(N)
     for run in range (0,N):
+        
         gen = Percolation_2D(size,p)
         lattice,max_cluster = gen.generate()    #generate lattice
 
