@@ -121,7 +121,7 @@ def f(x,a,c):
     return a*x + c
 
 if __name__ == '__main__':
-    p = 0.4999 #transition prob
+    p = 0.59274605079210 #transition prob
     size = 100
 
     gen = Percolation_2D(size,p)
