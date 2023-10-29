@@ -1,8 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from random import uniform
-
-import scipy.optimize as opt
 import scipy.ndimage as ndimage
 
 class Percolation_2D:
@@ -37,7 +35,8 @@ class Percolation_2D:
         for i in range(rows):
             for j in range(columns):
                 lattice[i][j] = uniform(0,1) <= self.p
-        
+        lattice = np.array(lattice) 
+        lattice = np.where(lattice==0, -1, 1)
         return lattice
 
 
@@ -52,6 +51,7 @@ class Percolation_2D:
             labeled_lattice : lattice with individual clusters labelled 
 
         """
+        lattice = np.where(lattice==-1, 0, 1)
         labeled_lattice, num = ndimage.label(lattice)
         return labeled_lattice    
         
@@ -66,7 +66,6 @@ class Percolation_2D:
             max_cluster : lattice with only max cluster [2d array] 
 
         """
-        
         count = np.bincount(np.reshape(lattice, self.size*self.size))
         count[0] = 0
         max_cluster_id = np.argmax(count)
@@ -83,57 +82,77 @@ class Percolation_2D:
         labeled_lattice = self.cluster_search(lattice)           #label lattice
         max_cluster = self.max_cluster(labeled_lattice)    #find max cluster
 
-        return lattice,max_cluster
+        return lattice, max_cluster
+    
+    def coarse_graining(self, b, lattice):
+        """
+        This function implements a majority rule coarse graining transformation on a lattice of N x N dimensions.
+        Inputs:
+            b : transformation scaling factor (multiple of 3) [type : Int]
+            lattice : an array of lattice values [type: numpy array]
 
+        Returns: 
+        scaled_lattice : transformed lattice [type : numpy array]
 
-def f(x,a,c):
-    return a*x + c
+        """
+        size = len(lattice[0,:])
+        scaled_lattice = np.zeros((int(size/b),int(size/b)))
+        i_new = 0
+        for i in range(1,size-1,b):
+            j_new = 0
+            for j in range(1,size-1,b):
+                lattice1 = lattice[i-1:i+2,j-1:j+2]
+                norm_lattice = np.sign(np.mean(lattice1))
+                scaled_lattice[i_new,j_new] = norm_lattice
+                j_new +=1
+            i_new+=1
+        return scaled_lattice
+    
+    def occupied_ratio(self, lattice):
+
+        occupied = np.count_nonzero(lattice==1)
+        non_occupied = np.count_nonzero(lattice==-1)
+        ratio = int(occupied)/int(non_occupied)
+
+        return ratio
 
 if __name__ == '__main__':
-    N = 5
-    p = 0.59274621  #transition prob
-    #0.59274621 is the critical prob
-    size = 500
-    dimensions = np.zeros(N)
-    for run in range (0,N):
-        
+
+    p = 0.59274605079210  #transition prob
+    size = 300
+    b = 3 #normalization scaling value
+    difference = 1
+
+    fig, (ax1,ax2,ax3) = plt.subplots(1,3)
+    gen = Percolation_2D(size,p)
+    lattice, max_cluster = gen.generate()
+    scaled_lattice = gen.coarse_graining(b, lattice)
+    scaled_lattice1 = gen.coarse_graining(b, scaled_lattice)
+
+    ax1.imshow(lattice, cmap="binary")
+    ax2.imshow(scaled_lattice, cmap="binary")
+    ax3.imshow(scaled_lattice1, cmap="binary")
+    #shooting method for determining the critical probability of the percolation transition.
+    """
+    while difference > 0.0001:
+
         gen = Percolation_2D(size,p)
-        lattice,max_cluster = gen.generate()    #generate lattice
+        lattice, max_cluster = gen.generate()
+        scaled_lattice = gen.coarse_graining(b, lattice)
+        scaled_lattice1 = gen.coarse_graining(b, scaled_lattice)
 
-        #fig = plt.figure()  #plot 
-        #ax1 = plt.axes()
-        #y_occupied,x_occupied = np.nonzero(lattice)
-        #ax1.scatter(x_occupied,y_occupied,color='black',s=0.02)
-        
-        #ax1.imshow(max_cluster, cmap="binary")
-        
-        cm = ndimage.center_of_mass(max_cluster)
-        #ax1.scatter(int(cm[1]),int(cm[0]),s=0.5,color='red')
-        
-        mass = np.zeros(int(size/4))
-        box_size = np.zeros(int(size/4))
-        for i in range(0,int(size/4)):
-            mask =np.ones_like(lattice)
-            width = 3 + 2*i #must be odd
-            offset = (width-1)/2
+        ratio1, ratio2, ratio3 = gen.occupied_ratio(lattice), gen.occupied_ratio(scaled_lattice), gen.occupied_ratio(scaled_lattice1)
+        delta_23 = abs(ratio2 - ratio3)
 
-            mask[int(cm[0] - offset):int(cm[0] + offset + 1), int(cm[1] - offset):int(cm[1] + offset + 1)] = 0
-
-            masked_lattice = np.ma.masked_array(max_cluster,mask)
-            mass[i] = len(np.ma.nonzero(masked_lattice)[0])
-            if mass[i] == 0:
-                mass[i] = 1
-            box_size[i] = width
-
-        #fig=plt.figure()
-        #ax2 = plt.axes()
-        #ax2.plot(np.log(box_size),np.log(mass))
-        indexes = np.where(np.gradient(mass,box_size)>0,True,False)
-        params,cov = opt.curve_fit(f,np.log(box_size[indexes]),np.log(mass[indexes]))
-        #ax2.plot(np.log(box_size), f(np.log(box_size), params[0],params[1]),color='red')
-        dimensions[run] = params[0]
-        print('looped')
-    print(dimensions)
-    print(f'fractal dimension is measured as {np.average(dimensions):.3} for a probabilty of {p:.4} over {N} runs')
+        if delta_23 > 0.001 and ratio3 < 1:
+            p += 0.00005
+            print("Prob increase")
+        if delta_23 > 0.001 and ratio3 > 1:
+            p -= 0.00005
+            print("Prob decreased")
         
-        #plt.show()
+        difference = delta_23
+    print("Threshold reached : ", p)
+    """
+
+    plt.show()
