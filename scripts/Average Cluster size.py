@@ -2,7 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from random import uniform
 import scipy.ndimage as ndimage
-import scipy.spatial as spatial
+import scipy.optimize as opt
+
 class Percolation_2D:
     """
     Class contiaing functions for simulating 2 dimensional percolation transitions
@@ -135,10 +136,12 @@ def average_cluster_size(labeled_lattice):
         average_size = average_size + (1/occupation_prob)*(s**2)*cluster_number[s]
 
     return average_size
+def func(x,gamma):
+    return (x)**(-gamma)
 if __name__ == '__main__':
 
     size = 100
-    probs = np.arange(0.5,0.65,0.005)
+    probs = np.arange(0.55,0.6,0.00025)
     reps = 10
     avg_sizes = np.zeros((len(probs),reps))
     for r in range(0,reps):
@@ -150,8 +153,15 @@ if __name__ == '__main__':
             avg_sizes[i,r] = average_cluster_size(labeled_lattice)
             i += 1
         
-
-    plt.plot(probs,np.average(avg_sizes,axis=1))
-    plt.vlines(0.59274621,np.min(avg_sizes)-2,np.max(avg_sizes)+2,linestyles='--')
-    plt.ylim(np.min(avg_sizes)-2,np.max(avg_sizes)+2)
+    p_c = 0.59274621
+    indx = np.argwhere(probs<p_c)
+    xdata = np.reshape(probs[indx],len(indx))
+    ydata = np.reshape(np.average(avg_sizes,axis=1)[indx],len(indx))
+    
+    plt.plot(probs[indx],np.average(avg_sizes,axis=1)[indx])
+    #plt.vlines(p_c,np.min(avg_sizes)-2,np.max(avg_sizes)+2,linestyles='--',color='black')
+    #plt.ylim(np.min(avg_sizes)-2,np.max(avg_sizes)+2)
+    ppot,pcov = opt.curve_fit(func,np.abs(xdata-p_c),ydata,2.38)
+    print(ppot)
+    plt.plot(xdata, func(np.abs(xdata-p_c), *ppot))
     plt.show()
