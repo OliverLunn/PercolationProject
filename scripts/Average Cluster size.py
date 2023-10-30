@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 from random import uniform
 import scipy.ndimage as ndimage
 import scipy.spatial as spatial
+from tqdm import tqdm
+
 class Percolation_2D:
     """
     Class contiaing functions for simulating 2 dimensional percolation transitions
@@ -115,7 +117,9 @@ class Percolation_2D:
         ratio = int(occupied)/int(non_occupied)
 
         return ratio
+    
 def average_cluster_size(labeled_lattice):
+
     clust_id = np.arange(1,np.max(labeled_lattice)+1)
     clust_size = np.zeros(np.max(labeled_lattice))
     for id in clust_id:
@@ -135,13 +139,15 @@ def average_cluster_size(labeled_lattice):
         average_size = average_size + (1/occupation_prob)*(s**2)*cluster_number[s]
 
     return average_size
+
 if __name__ == '__main__':
 
     size = 100
-    probs = np.arange(0.5,0.65,0.005)
-    reps = 10
+    probs = np.arange(0.1,0.99,0.005)
+    reps = 5
     avg_sizes = np.zeros((len(probs),reps))
-    for r in range(0,reps):
+
+    for r in tqdm(range(0,reps)):
         i=0
         for p in probs:
             gen = Percolation_2D(size,p)
@@ -149,7 +155,6 @@ if __name__ == '__main__':
             labeled_lattice = gen.cluster_search(lattice)
             avg_sizes[i,r] = average_cluster_size(labeled_lattice)
             i += 1
-        
 
     plt.plot(probs,np.average(avg_sizes,axis=1))
     plt.vlines(0.59274621,np.min(avg_sizes)-2,np.max(avg_sizes)+2,linestyles='--')
