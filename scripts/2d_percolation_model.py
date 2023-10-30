@@ -36,7 +36,6 @@ class Percolation_2D:
             for j in range(columns):
                 lattice[i][j] = uniform(0,1) <= self.p
         lattice = np.array(lattice) 
-        lattice = np.where(lattice==0, -1, 1)
         return lattice
 
 
@@ -51,7 +50,6 @@ class Percolation_2D:
             labeled_lattice : lattice with individual clusters labelled 
 
         """
-        lattice = np.where(lattice==-1, 0, 1)
         labeled_lattice, num = ndimage.label(lattice)
         return labeled_lattice    
         
@@ -82,7 +80,7 @@ class Percolation_2D:
         labeled_lattice = self.cluster_search(lattice)           #label lattice
         max_cluster = self.max_cluster(labeled_lattice)    #find max cluster
 
-        return lattice, max_cluster
+        return lattice, max_cluster, labeled_lattice
     
     def coarse_graining(self, b, lattice):
         """
@@ -121,17 +119,17 @@ def f(x,a,c):
     return a*x + c
 
 if __name__ == '__main__':
-    p = 0.59274605079210 #transition prob
-    size = 100
+    p = 0.6 #transition prob
+    size = 20
 
     gen = Percolation_2D(size,p)
-    lattice,max_cluster = gen.generate()    #generate lattice
+    lattice,max_cluster,labeled_lattice = gen.generate()    #generate lattice
     
-    fig = plt.figure()    #plot 
-    ax1 = plt.axes()
+    fig,(ax1,ax2,ax3) = plt.subplots(1,3)    #plot 
 
     y_occupied,x_occupied = np.where(lattice==1)
-    ax1.scatter(x_occupied,y_occupied,color='black',s=0.005)
-    ax1.imshow(max_cluster, cmap="binary")
+    ax1.imshow(max_cluster,cmap = "binary")
+    ax2.imshow(lattice, cmap = "binary")
+    ax3.imshow(labeled_lattice)
 
     plt.show()
