@@ -2,7 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from random import uniform
 import scipy.ndimage as ndimage
+<<<<<<< HEAD
+import scipy.spatial as spatial
+from tqdm import tqdm
+=======
 import scipy.optimize as opt
+>>>>>>> 4d5de2d54d059330907d623e1670c01d94ffd8be
 
 class Percolation_2D:
     """
@@ -116,7 +121,9 @@ class Percolation_2D:
         ratio = int(occupied)/int(non_occupied)
 
         return ratio
+    
 def average_cluster_size(labeled_lattice):
+
     clust_id = np.arange(1,np.max(labeled_lattice)+1)
     clust_size = np.zeros(np.max(labeled_lattice))
     for id in clust_id:
@@ -136,6 +143,14 @@ def average_cluster_size(labeled_lattice):
         average_size = average_size + (1/occupation_prob)*(s**2)*cluster_number[s]
 
     return average_size
+<<<<<<< HEAD
+
+if __name__ == '__main__':
+
+    size = 100
+    probs = np.arange(0.1,0.99,0.005)
+    reps = 5
+=======
 def func(x,gamma):
     return (x)**(-gamma)
 if __name__ == '__main__':
@@ -143,8 +158,10 @@ if __name__ == '__main__':
     size = 100
     probs = np.arange(0.55,0.6,0.00025)
     reps = 10
+>>>>>>> 4d5de2d54d059330907d623e1670c01d94ffd8be
     avg_sizes = np.zeros((len(probs),reps))
-    for r in range(0,reps):
+
+    for r in tqdm(range(0,reps)):
         i=0
         for p in probs:
             gen = Percolation_2D(size,p)
@@ -152,6 +169,12 @@ if __name__ == '__main__':
             labeled_lattice = gen.cluster_search(lattice)
             avg_sizes[i,r] = average_cluster_size(labeled_lattice)
             i += 1
+<<<<<<< HEAD
+
+    plt.plot(probs,np.average(avg_sizes,axis=1))
+    plt.vlines(0.59274621,np.min(avg_sizes)-2,np.max(avg_sizes)+2,linestyles='--')
+    plt.ylim(np.min(avg_sizes)-2,np.max(avg_sizes)+2)
+=======
         
     p_c = 0.59274621
     indx = np.argwhere(probs<p_c)
@@ -164,4 +187,5 @@ if __name__ == '__main__':
     ppot,pcov = opt.curve_fit(func,np.abs(xdata-p_c),ydata,2.38)
     print(ppot)
     plt.plot(xdata, func(np.abs(xdata-p_c), *ppot))
+>>>>>>> 4d5de2d54d059330907d623e1670c01d94ffd8be
     plt.show()
