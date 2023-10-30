@@ -52,7 +52,7 @@ class Percolation_2D:
 
         """
         lattice = np.where(lattice==-1, 0, 1)
-        labeled_lattice, num = ndimage.label(lattice,mode = "wrap")
+        labeled_lattice, num = ndimage.label(lattice)
         return labeled_lattice    
         
     def max_cluster(self,lattice):
@@ -115,26 +115,43 @@ class Percolation_2D:
         ratio = int(occupied)/int(non_occupied)
 
         return ratio
+def average_cluster_size(labeled_lattice):
+    clust_id = np.arange(1,np.max(labeled_lattice)+1)
+    clust_size = np.zeros(np.max(labeled_lattice))
+    for id in clust_id:
+        clust_size[id-1] =int(len(np.where(labeled_lattice==id)[0]))
+    
+    cluster_number = np.zeros(int(np.max(clust_size))+1)
+    occupation_prob = 0
 
+    for s in clust_size:
+        s=int(s)
+        cluster_number[s] = cluster_number[s] + 1
+        occupation_prob = occupation_prob + (s*cluster_number[s])
+    
+    average_size = 0
+    for s in clust_size:
+        s=int(s)
+        average_size = average_size + (1/occupation_prob)*(s**2)*cluster_number[s]
+
+    return average_size
 if __name__ == '__main__':
 
-    p = 0.9 #transition prob
     size = 100
-    
-    gen = Percolation_2D(size,p)
-    lattice = gen.lattice_random()
-    labeled_lattice = gen.cluster_search(lattice)
-    cluster_lengths = np.array([])
-    for clust_num in range(1,np.max(labeled_lattice)+1):
-        cluster = np.where(labeled_lattice == clust_num,1,0)
-        ys,xs = np.nonzero(cluster)
-        points = np.stack((xs,ys),axis=-1)
-        if len(points) >= 2:
-            cluster_lengths = np.append(cluster_lengths, np.average(spatial.distance.pdist(points)))
-    print(cluster_lengths)
-    average_clust_size =np.average(cluster_lengths)
-    print(average_clust_size)
-    plt.imshow(labeled_lattice)
-    plt.figure()
-    plt.imshow(lattice,cmap="binary")
+    probs = np.arange(0.5,0.65,0.005)
+    reps = 10
+    avg_sizes = np.zeros((len(probs),reps))
+    for r in range(0,reps):
+        i=0
+        for p in probs:
+            gen = Percolation_2D(size,p)
+            lattice = gen.lattice_random()
+            labeled_lattice = gen.cluster_search(lattice)
+            avg_sizes[i,r] = average_cluster_size(labeled_lattice)
+            i += 1
+        
+
+    plt.plot(probs,np.average(avg_sizes,axis=1))
+    plt.vlines(0.59274621,np.min(avg_sizes)-2,np.max(avg_sizes)+2,linestyles='--')
+    plt.ylim(np.min(avg_sizes)-2,np.max(avg_sizes)+2)
     plt.show()
