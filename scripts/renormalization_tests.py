@@ -113,13 +113,14 @@ class Percolation_2D:
         occupied = np.count_nonzero(lattice==1)
         non_occupied = np.count_nonzero(lattice==-1)
         ratio = int(occupied)/int(non_occupied)
-
+ 
         return ratio
+    
 
 if __name__ == '__main__':
 
     p = 0.59274605079210  #transition prob
-    size = 300
+    size = 30
     b = 3 #normalization scaling value
     difference = 1
 

@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import networkx as nx
+from scipy.spatial import Delaunay
+
 def assign_random_numbers(G):
     for node in G.nodes:
         G.nodes[node]['random_number'] = np.random.random()  # Assigning a random number to each node
@@ -17,7 +19,7 @@ def find_clusters(G):
     return clusters
 
 p=0.5
-G = nx.triangular_lattice_graph(2,2)
+G = nx.triangular_lattice_graph(50,75)
 G = assign_random_numbers(G)
 G = occupied(G,p)
 clusters = find_clusters(G)
@@ -33,8 +35,15 @@ for i, cluster in enumerate(clusters):
         nx.draw_networkx_edges(G, pos=pos, edgelist=cluster_edges, edge_color='black',style='solid',width=1.5)
     
 
-selected_nodes = [node for node in G.nodes if G.nodes[node]['pos'] == (0,0)] 
-print(selected_nodes['pos'])
+#selected_nodes = G.subgraph([[0,1]])
 plt.axis('square')
 plt.tight_layout()
+
+pos_array = []
+pos = [G.nodes[node]["pos"] for node in G.nodes]
+pos = np.append(pos_array,pos)
+#print(nx.triangles(G))
+
+#tri = Delaunay(pos_array)
+#plt.imshow(tri)
 plt.show()
