@@ -98,6 +98,7 @@ class Percolation_2D:
         size = len(lattice[0,:])
         scaled_lattice = np.zeros((int(size/b),int(size/b)))
         i_new = 0
+
         for i in range(1,size-1,b):
             j_new = 0
             for j in range(1,size-1,b):
@@ -107,53 +108,62 @@ class Percolation_2D:
                 j_new +=1
             i_new+=1
         return scaled_lattice
-    
-    def occupied_ratio(self, lattice):
 
-        occupied = np.count_nonzero(lattice==1)
-        non_occupied = np.count_nonzero(lattice==-1)
-        ratio = int(occupied)/int(non_occupied)
- 
-        return ratio
+    def renorm_group(self, b, lattice):
+        size = len(lattice[0,:])
+        scaled_lattice = np.zeros((int(size/b), int(size/b)))
+        
+        i_new = 0
+
+        for i in range(0, size+1, b):
+            j_new = 0
+
+            for j in range(0, size+1, b):
+
+                lattice1 = lattice[i:i+1,j:j+1]
+                
+                count = sum(lattice1)
+                print(lattice1)
+                ab = sum(lattice1[0,:])
+                ac = sum(lattice1[:,0])
+                array = [ab,ac]
+
+                if sum(count) > 0:
+                    norm_lattice = 1
+            
+                elif sum(count) == 0:
+                    if 2 in array:
+                        norm_lattice = 1
+                    else:
+                        norm_lattice = 0
+                else:
+                    norm_lattice = 0
+                scaled_lattice[i_new, j_new] = norm_lattice
+
+                j_new += 1
+            i_new += 1
+
+        return scaled_lattice
+
     
+
 
 if __name__ == '__main__':
 
     p = 0.59274605079210  #transition prob
-    size = 30
-    b = 3 #normalization scaling value
+    size = 4
+    b = 2 #normalization scaling value
     difference = 1
 
-    fig, (ax1,ax2,ax3) = plt.subplots(1,3)
+    fig, (ax1,ax2) = plt.subplots(1,2)
     gen = Percolation_2D(size,p)
     lattice, max_cluster = gen.generate()
-    scaled_lattice = gen.coarse_graining(b, lattice)
-    scaled_lattice1 = gen.coarse_graining(b, scaled_lattice)
+    scaled_lattice = gen.renorm_group(b, lattice)
+    #scaled_lattice1 = gen.coarse_graining(b, scaled_lattice)
 
     ax1.imshow(lattice, cmap="binary")
     ax2.imshow(scaled_lattice, cmap="binary")
-    ax3.imshow(scaled_lattice1, cmap="binary")
-    #shooting method for determining the critical probability of the percolation transition.
-    """
-    while difference > 0.0001:
+    #ax3.imshow(scaled_lattice1, cmap="binary")
 
-        gen = Percolation_2D(size,p)
-        lattice, max_cluster = gen.generate()
-        scaled_lattice = gen.coarse_graining(b, lattice)
-        scaled_lattice1 = gen.coarse_graining(b, scaled_lattice)
-
-        ratio1, ratio2, ratio3 = gen.occupied_ratio(lattice), gen.occupied_ratio(scaled_lattice), gen.occupied_ratio(scaled_lattice1)
-        delta_23 = abs(ratio2 - ratio3)
-
-        if delta_23 > 0.001 and ratio3 < 1:
-            p += 0.00005
-            print("Prob increase")
-        if delta_23 > 0.001 and ratio3 > 1:
-            p -= 0.00005
-            print("Prob decreased")
-        
-        difference = delta_23
-    print("Threshold reached : ", p)
-    """
 
     plt.show()

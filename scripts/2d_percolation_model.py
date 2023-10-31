@@ -120,7 +120,7 @@ def f(x,a,c):
 
 if __name__ == '__main__':
     p = 0.6 #transition prob
-    size = 25
+    size = 2000
 
     gen = Percolation_2D(size,p)
     lattice, labeled_lattice, max_cluster = gen.generate()    #generate lattice

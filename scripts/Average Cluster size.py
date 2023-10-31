@@ -140,6 +140,7 @@ def average_cluster_size(labeled_lattice):
         average_size = average_size + (1/occupation_prob)*(s**2)*cluster_number[s]
 
     return average_size
+
 def func(x,gamma):
     return (x)**(-gamma)
 
@@ -152,7 +153,7 @@ def diverge(probs, p_c, array):
 if __name__ == '__main__':
 
     size = 10
-    probs = np.arange(0.5927,0.5928,0.000000025)
+    probs = np.arange(0.2,0.8,0.000025)
     reps = 2
     avg_sizes = np.zeros((len(probs),reps))
     p_c = 0.59274621
@@ -173,10 +174,9 @@ if __name__ == '__main__':
     ax1.plot(probs,np.average(avg_sizes,axis=1))
     ydata = np.average(avg_sizes,axis=1)
     ax1.vlines(p_c,np.min(avg_sizes)-2,np.max(avg_sizes)+2,linestyles='--',color='black')
-    #ax1.ylim(np.min(avg_sizes)-2,np.max(avg_sizes)+2)
+    ax1.ylim(np.min(avg_sizes)-2,np.max(avg_sizes)+2)
     ppot,pcov = opt.curve_fit(func,np.abs(probs-p_c),ydata,2.38)
     #print(ppot)
     ax1.plot(probs, func(np.abs(probs-p_c), *ppot))
-
     ax2.plot(probs, diverge(probs, p_c, zeta_array))
     plt.show()
