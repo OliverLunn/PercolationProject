@@ -2,12 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from random import uniform
 import scipy.ndimage as ndimage
-<<<<<<< HEAD
 import scipy.spatial as spatial
 from tqdm import tqdm
-=======
 import scipy.optimize as opt
->>>>>>> 4d5de2d54d059330907d623e1670c01d94ffd8be
 
 class Percolation_2D:
     """
@@ -143,22 +140,13 @@ def average_cluster_size(labeled_lattice):
         average_size = average_size + (1/occupation_prob)*(s**2)*cluster_number[s]
 
     return average_size
-<<<<<<< HEAD
-
-if __name__ == '__main__':
-
-    size = 100
-    probs = np.arange(0.1,0.99,0.005)
-    reps = 5
-=======
 def func(x,gamma):
     return (x)**(-gamma)
 if __name__ == '__main__':
 
-    size = 100
-    probs = np.arange(0.55,0.6,0.00025)
+    size = 25
+    probs = np.arange(0.4,0.7,0.00025)
     reps = 10
->>>>>>> 4d5de2d54d059330907d623e1670c01d94ffd8be
     avg_sizes = np.zeros((len(probs),reps))
 
     for r in tqdm(range(0,reps)):
@@ -169,23 +157,13 @@ if __name__ == '__main__':
             labeled_lattice = gen.cluster_search(lattice)
             avg_sizes[i,r] = average_cluster_size(labeled_lattice)
             i += 1
-<<<<<<< HEAD
-
-    plt.plot(probs,np.average(avg_sizes,axis=1))
-    plt.vlines(0.59274621,np.min(avg_sizes)-2,np.max(avg_sizes)+2,linestyles='--')
-    plt.ylim(np.min(avg_sizes)-2,np.max(avg_sizes)+2)
-=======
         
-    p_c = 0.59274621
-    indx = np.argwhere(probs<p_c)
-    xdata = np.reshape(probs[indx],len(indx))
-    ydata = np.reshape(np.average(avg_sizes,axis=1)[indx],len(indx))
-    
-    plt.plot(probs[indx],np.average(avg_sizes,axis=1)[indx])
+    p_c = 0.59274621    
+    #plt.plot(probs,np.average(avg_sizes,axis=1))
+    ydata = np.average(avg_sizes,axis=1)
     #plt.vlines(p_c,np.min(avg_sizes)-2,np.max(avg_sizes)+2,linestyles='--',color='black')
     #plt.ylim(np.min(avg_sizes)-2,np.max(avg_sizes)+2)
-    ppot,pcov = opt.curve_fit(func,np.abs(xdata-p_c),ydata,2.38)
-    print(ppot)
-    plt.plot(xdata, func(np.abs(xdata-p_c), *ppot))
->>>>>>> 4d5de2d54d059330907d623e1670c01d94ffd8be
+    ppot,pcov = opt.curve_fit(func,np.abs(probs-p_c),ydata,2.38)
+    #print(ppot)
+    plt.plot(probs, func(np.abs(probs-p_c), *ppot))
     plt.show()
