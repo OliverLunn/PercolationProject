@@ -17,7 +17,7 @@ def find_clusters(G):
     return clusters
 
 p=0.5
-G = nx.triangular_lattice_graph(50,75)
+G = nx.triangular_lattice_graph(2,2)
 G = assign_random_numbers(G)
 G = occupied(G,p)
 clusters = find_clusters(G)
@@ -31,8 +31,10 @@ nx.draw_networkx_nodes(G, pos=pos, node_color=node_colors, cmap=plt.get_cmap('wi
 for i, cluster in enumerate(clusters):
         cluster_edges = G.subgraph(cluster).edges()
         nx.draw_networkx_edges(G, pos=pos, edgelist=cluster_edges, edge_color='black',style='solid',width=1.5)
-        
+    
 
+selected_nodes = [node for node in G.nodes if G.nodes[node]['pos'] == (0,0)] 
+print(selected_nodes['pos'])
 plt.axis('square')
 plt.tight_layout()
 plt.show()
