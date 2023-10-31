@@ -68,4 +68,12 @@ for j in range(0,height//2):
 
 plt.axis('square')
 plt.tight_layout()
+
+pos_array = []
+pos = [G.nodes[node]["pos"] for node in G.nodes]
+pos = np.append(pos_array,pos)
+#print(nx.triangles(G))
+
+#tri = Delaunay(pos_array)
+#plt.imshow(tri)
 plt.show()
