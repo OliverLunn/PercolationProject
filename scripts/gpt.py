@@ -1,44 +1,40 @@
-import networkx as nx
-import random
 import matplotlib.pyplot as plt
+import numpy as np
+import networkx as nx
 
-# Function to generate a triangular lattice
-def generate_triangular_lattice(rows, cols):
-    G = nx.Graph()
-    for r in range(rows):
-        for c in range(cols):
-            if r % 2 == 0:
-                G.add_node((r, c), pos=(c, -r))
-            else:
-                G.add_node((r, c), pos=(c + 0.5, -r))
-            if c > 0:
-                G.add_edge((r, c), (r, c - 1))
-            if r > 0:
-                if r % 2 == 0:
-                    G.add_edge((r, c), (r - 1, c))
-                else:
-                    if c < cols - 1:
-                        G.add_edge((r, c), (r - 1, c + 1))
-                    G.add_edge((r, c), (r - 1, c))
-    return G
-
-# Function to assign random numbers to each node
 def assign_random_numbers(G):
     for node in G.nodes:
-        G.nodes[node]['random_number'] = random.random()  # Assigning a random number to each node
+        G.nodes[node]['random_number'] = np.random.random()  # Assigning a random number to each node
+    return G
 
-# Generating a triangular lattice
-rows = 6  # Number of rows
-cols = 6  # Number of columns
-lattice = generate_triangular_lattice(rows, cols)
+def occupied(G, p):
+    for node in G.nodes:
+        G.nodes[node]['occupied'] = G.nodes[node]['random_number'] < p
+    return G
 
-# Assigning random numbers to each node
-assign_random_numbers(lattice)
+def find_clusters(G):
+    occupied_nodes = [node for node in G.nodes if G.nodes[node]['occupied']]
+    clusters = list(nx.connected_components(G.subgraph(occupied_nodes)))
+    return clusters
 
-# Plotting the graph
-pos = {node: attrs['pos'] for node, attrs in lattice.nodes(data=True)}
-node_colors = [lattice.nodes[node]['random_number'] for node in lattice.nodes]
-nx.draw(lattice, pos=pos, node_color=node_colors, cmap=plt.cm.plasma, with_labels=False, node_size=100)
-plt.title('Triangular Lattice with Random Numbers')
-plt.colorbar(plt.cm.ScalarMappable(cmap=plt.cm.plasma))
+p = 0.5
+G = nx.triangular_lattice_graph(10, 20)
+G = assign_random_numbers(G)
+G = occupied(G, p)
+clusters = find_clusters(G)
+
+labels = {node: f"{G.nodes[node]['occupied']:.2f}" for node in G.nodes}
+node_colors = [G.nodes[node]['occupied'] for node in G.nodes]
+
+pos = nx.spring_layout(G)  # Positions for the nodes
+
+# Draw the graph
+plt.figure(figsize=(8, 6))
+nx.draw(G, pos=pos, node_color=node_colors, cmap=plt.get_cmap('winter'), node_size=200)
+
+for i, cluster in enumerate(clusters):
+    cluster_edges = G.subgraph(cluster).edges()
+    nx.draw(G, pos=pos, edgelist=cluster_edges, edge_color='black', style='solid', width=2)
+
+plt.title('Triangular Lattice with Occupied Node Clusters')
 plt.show()
