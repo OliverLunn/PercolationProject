@@ -1,40 +1,38 @@
-import matplotlib.pyplot as plt
-import numpy as np
 import networkx as nx
+import random
+import matplotlib.pyplot as plt
 
-def assign_random_numbers(G):
-    for node in G.nodes:
-        G.nodes[node]['random_number'] = np.random.random()  # Assigning a random number to each node
-    return G
+# Create a triangular lattice
+rows = 5  # Number of rows
+cols = 5  # Number of columns
+G = nx.triangular_lattice_graph(rows, cols)
 
-def occupied(G, p):
-    for node in G.nodes:
-        G.nodes[node]['occupied'] = G.nodes[node]['random_number'] < p
-    return G
+# Assign random numbers and occupation based on probability
+p = 0.6  # Probability threshold for occupation
 
-def find_clusters(G):
-    occupied_nodes = [node for node in G.nodes if G.nodes[node]['occupied']]
-    clusters = list(nx.connected_components(G.subgraph(occupied_nodes)))
-    return clusters
+for node in G.nodes():
+    random_number = random.uniform(0, 1)  # Generate a random number between 0 and 1
+    G.nodes[node]['random_number'] = random_number  # Assign the random number to the node
 
-p = 0.5
-G = nx.triangular_lattice_graph(10, 20)
-G = assign_random_numbers(G)
-G = occupied(G, p)
-clusters = find_clusters(G)
+    occupation = int(random_number < p)  # Assign occupation based on the probability 'p' (1 for 'Occupied', 0 for 'Unoccupied')
+    G.nodes[node]['occupation'] = occupation  # Assign the occupation to the node
 
-labels = {node: f"{G.nodes[node]['occupied']:.2f}" for node in G.nodes}
-node_colors = [G.nodes[node]['occupied'] for node in G.nodes]
+# Renormalize the lattice based on the average of 3 nodes in a triangle
+new_G = nx.Graph()
+for node in G.nodes():
+    neighbors = list(G.neighbors(node))
+    neighbor_occupations = [G.nodes[neighbor]['occupation'] for neighbor in neighbors]
+    if len(neighbor_occupations) == 3:
+        average_occupation = sum(neighbor_occupations) / 3  # Calculate the average of 3 neighboring nodes
+        new_G.add_node(node, occupation=int(average_occupation + 0.5))  # Add nodes with re-normalized occupation
 
-pos = nx.spring_layout(G)  # Positions for the nodes
+for edge in G.edges():
+    if edge[0] in new_G.nodes() and edge[1] in new_G.nodes():
+        new_G.add_edge(edge[0], edge[1])  # Add edges to the new lattice
 
-# Draw the graph
-plt.figure(figsize=(8, 6))
-nx.draw(G, pos=pos, node_color=node_colors, cmap=plt.get_cmap('winter'), node_size=200)
-
-for i, cluster in enumerate(clusters):
-    cluster_edges = G.subgraph(cluster).edges()
-    nx.draw(G, pos=pos, edgelist=cluster_edges, edge_color='black', style='solid', width=2)
-
-plt.title('Triangular Lattice with Occupied Node Clusters')
+# Draw the renormalized graph with node labels based on occupation
+pos = {node: new_G.nodes[node]['pos'] for node in new_G}  # Define node positions
+node_labels = {node: new_G.nodes[node]['occupation'] for node in new_G.nodes()}  # Assign node labels based on occupation
+nx.draw(new_G, pos, with_labels=True)
+nx.draw_networkx_labels(new_G, pos, labels=node_labels)  # Label the nodes based on their occupation
 plt.show()
