@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from random import uniform
 import scipy.ndimage as ndimage
+from tqdm import tqdm
+import scipy.optimize as opt
 
 class Percolation_2D:
     """
@@ -38,7 +40,6 @@ class Percolation_2D:
         lattice = np.array(lattice) 
         lattice = np.where(lattice==0, -1, 1)
         return lattice
-
 
     def cluster_search(self,lattice):
         """
@@ -78,9 +79,9 @@ class Percolation_2D:
         Function that generates a lattice and finds the maxium cluster size within the lattice
         
         """
-        lattice = self.lattice_random()             #generate lattice
-        labeled_lattice = self.cluster_search(lattice)           #label lattice
-        max_cluster = self.max_cluster(labeled_lattice)    #find max cluster
+        lattice = self.lattice_random()
+        labeled_lattice = self.cluster_search(lattice)
+        max_cluster = self.max_cluster(labeled_lattice)
 
         return lattice, max_cluster
     
@@ -114,6 +115,21 @@ class Percolation_2D:
         return scaled_lattice
 
     def renorm_group(self, b, size, lattice):
+        """
+        Scales a lattice by grouping elements in blocks of size 'b' and applying a normalization rule.
+
+        Inputs:
+            b (int): Block size for grouping elements.
+            size (int): Size of the lattice along each dimension.
+            lattice (numpy.ndarray): Input lattice as a 2D numpy array.
+
+        Returns:
+            numpy.ndarray: Scaled lattice with elements grouped and normalized.
+
+        The function takes a lattice represented as a 2D numpy array and groups its elements
+        in blocks of size 'b'. For each block, it applies a normalization rule based on the
+        sum of elements in the block and specific conditions.
+        """
         scaled_lattice = np.zeros((int(size/b), int(size/b)))
         i_new = 0
         for i in range(0, size-1, b):
@@ -136,24 +152,62 @@ class Percolation_2D:
                     if 2 in array:
                         norm_lattice = 1
                     else:
-                        norm_lattice = 0
+                        norm_lattice = -1
                 else:
-                    norm_lattice = 0
+                    norm_lattice = -1
 
                 scaled_lattice[i_new, j_new] = norm_lattice
                 j_new += 1  
             i_new += 1
 
         return scaled_lattice
+    
+    def average_cluster_size(self, labeled_lattice):
+        
+        clust_id = np.arange(1,np.max(labeled_lattice)+1)
+        clust_size = np.zeros(np.max(labeled_lattice))
+        
+        for id in clust_id:
+            clust_size[id-1] = int(len(np.where(labeled_lattice==id)[0]))
+        
+        cluster_number = np.zeros(int(np.max(clust_size))+1)
+        occupation_prob = 0
 
+        for s in clust_size:
+            s=int(s)
+            cluster_number[s] = cluster_number[s] + 1
+            occupation_prob = occupation_prob + (s*cluster_number[s])
+        
+        average_size = 0
+        for s in clust_size:
+            s=int(s)
+            average_size = average_size + (1/occupation_prob)*(s**2)*cluster_number[s]
+        
+        return average_size
+    
+    def renorm_group_prediction(self, probs, array):
+        for p in probs:
+            p_prime = p**4+4*p**3*(1-p)+2*p**2*(1-p)**2
+            array = np.append(array, p_prime)
+        return array
+
+def func(p,a,b):
+    return a*p**4+b*p**3*(1-p)
+    
 if __name__ == '__main__':
 
     p = 0.59274605079210  #transition prob
-    size, size1 = 300, 150
+    p=0.65
+    size, size1 = 50, 25
     b = 2 #normalization scaling value
-    difference = 1
+    rep = 5
+    probs = np.arange(0.05,0.995,0.01)
+    avg_sizes = np.zeros((len(probs), rep))
+    avg_size1 = np.zeros((len(probs), rep))
+    renorm_array = []
 
-    fig, ((ax1,ax2,ax3),(ax4,ax5,ax6)) = plt.subplots(2,3)
+    '''
+    fig, (ax1,ax2,ax3) = plt.subplots(1,3)
     gen = Percolation_2D(size,p)
     lattice, max_cluster = gen.generate()
     scaled_lattice = gen.renorm_group(b, size, lattice)
@@ -162,14 +216,28 @@ if __name__ == '__main__':
     ax1.imshow(lattice, cmap="binary")
     ax2.imshow(scaled_lattice, cmap="binary")
     ax3.imshow(scaled_lattice1, cmap="binary")
+    '''
 
+    for r in tqdm(range(0,rep)):
+        i=0
+        for p in probs:
+            gen = Percolation_2D(size,p)
+            lattice = gen.lattice_random()
+            labeled_lattice = gen.cluster_search(lattice)
+            avg_sizes[i,r] = gen.average_cluster_size(labeled_lattice)
+            lattice_renorm = gen.renorm_group(b, size, lattice)
+            lattice_renorm_lab = gen.cluster_search(lattice_renorm)
+            avg_size1[i,r] = gen.average_cluster_size(lattice_renorm_lab)
+
+            i += 1
     
-    scaled_lattice2 = gen.coarse_graining(b, lattice)
-    scaled_lattice12 = gen.coarse_graining(b, scaled_lattice2)
-    
-    ax4.imshow(lattice, cmap="binary")
-    ax5.imshow(scaled_lattice2, cmap="binary")
-    ax6.imshow(scaled_lattice12, cmap="binary")
-
-
-    plt.show() 
+    ydata = np.average(avg_sizes,axis=1)
+    ppot,pcov = opt.curve_fit(func,probs,ydata)
+    plt.plot(probs, avg_size1/np.max(avg_size1), "k.", label="simulation results")
+    plt.plot(probs, probs, "b--", label="$p=p'$")
+    plt.plot(probs, gen.renorm_group_prediction(probs, renorm_array), label="R(p)")
+    plt.ylabel("Average Cluster Size, $\zeta_p$")
+    plt.xlabel("Probability, $p$")
+    #plt.plot(probs, func(probs, *ppot)/np.max(avg_size1))
+    plt.legend()
+    plt.show()
