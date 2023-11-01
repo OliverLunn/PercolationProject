@@ -41,7 +41,9 @@ xs = positions[:,0]
 ys = positions[:,1]
 len_bot_row = np.count_nonzero(ys==0)
 len_sec_row = np.count_nonzero(ys==1)
+print(len_bot_row,len_sec_row)
 height = np.max(ys)
+print(height)
 
 #scan on long row sites
 occupations = np.zeros((height+1,len_bot_row))
@@ -54,17 +56,17 @@ for i in range(0,int(np.floor(height/2))+1):
     off = len_bot_row + i*(len_sec_row+len_bot_row)
     occupations[2*i+1,0:len_sec_row] = occs[off:off+len_sec_row]
 
-print(occupations)
-#find on edge triangles
-for j in range(0,height,2):
+
+#find on edge triangle occupations
+for j in range(0,height//2+1):
     for i in range(0,(len_bot_row+1)//3):
-        tri = [occupations[j,i*3],occupations[j,(i*3)+1],occupations[1+j,i*3]]
-    
-#find off edge triangles
+        tri = [occupations[2*j,i*3],occupations[2*j,(i*3)+1],occupations[1+j*2,i*3]]
+        new_occ = np.average(tri) > 0.5
+#find off edge triangle occupations
 for j in range(0,height//2):
     for i in range(0,len_sec_row//3):
         tri = [occupations[1+j*2,1+i*3],occupations[1+j*2,2+i*3],occupations[2+j*2,2+i*3]]
-        print(tri)
+        new_occ = np.average(tri) > 0.5
 
 plt.axis('square')
 plt.tight_layout()
