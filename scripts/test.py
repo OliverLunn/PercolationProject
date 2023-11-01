@@ -1,0 +1,2 @@
+ages = [((0, 0), {'occupied': False, 'pos': (0, 0.0)}), ((0, 1), {'occupied': False, 'pos': (0, 0.8660254037844386)}), ((2, 0), {'occupied': True, 'pos': (2, 0.0)}), ((2, 1), {'occupied': True, 'pos': (2, 0.8660254037844386)}), ((1, 0), {'occupied': False, 'pos': (1, 0.0)}), ((1, 1), {'occupied': True, 'pos': (1, 0.8660254037844386)}), ((0, 2), {'pos': (0, 1.7320508075688772)})]
+print(ages[1][1]['occupied'])
