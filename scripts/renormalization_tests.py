@@ -99,34 +99,35 @@ class Percolation_2D:
         scaled_lattice = np.zeros((int(size/b),int(size/b)))
         i_new = 0
 
-        for i in range(1,size-1,b):
+        for i in range(1,size,b):
             j_new = 0
-            for j in range(1,size-1,b):
+            for j in range(1,size,b):
                 lattice1 = lattice[i-1:i+2,j-1:j+2]
                 norm_lattice = np.sign(np.mean(lattice1))
-                scaled_lattice[i_new,j_new] = norm_lattice
+                    
+                if norm_lattice==0:
+                    scaled_lattice[i_new, j_new] = 1
+                else:
+                    scaled_lattice[i_new,j_new] = norm_lattice
                 j_new +=1
             i_new+=1
         return scaled_lattice
 
-    def renorm_group(self, b, lattice):
-        size = len(lattice[0,:])
+    def renorm_group(self, b, size, lattice):
         scaled_lattice = np.zeros((int(size/b), int(size/b)))
-        
         i_new = 0
-
-        for i in range(0, size+1, b):
+        for i in range(0, size-1, b):
             j_new = 0
-
-            for j in range(0, size+1, b):
-
-                lattice1 = lattice[i:i+1,j:j+1]
+            for j in range(0, size-1, b):
                 
+                lattice1 = lattice[i:i+2,j:j+2]
                 count = sum(lattice1)
-                print(lattice1)
-                ab = sum(lattice1[0,:])
-                ac = sum(lattice1[:,0])
-                array = [ab,ac]
+
+                ab = lattice1[0,0:2]
+                ac = lattice1[0:2,0]
+                bd = lattice1[1,0:2]
+                cd = lattice1[0:2,1]
+                array = np.array([sum(ab),sum(ac),sum(bd), sum(cd)])
 
                 if sum(count) > 0:
                     norm_lattice = 1
@@ -138,32 +139,37 @@ class Percolation_2D:
                         norm_lattice = 0
                 else:
                     norm_lattice = 0
-                scaled_lattice[i_new, j_new] = norm_lattice
 
-                j_new += 1
+                scaled_lattice[i_new, j_new] = norm_lattice
+                j_new += 1  
             i_new += 1
 
         return scaled_lattice
 
-    
-
-
 if __name__ == '__main__':
 
     p = 0.59274605079210  #transition prob
-    size = 4
+    size, size1 = 300, 150
     b = 2 #normalization scaling value
     difference = 1
 
-    fig, (ax1,ax2) = plt.subplots(1,2)
+    fig, ((ax1,ax2,ax3),(ax4,ax5,ax6)) = plt.subplots(2,3)
     gen = Percolation_2D(size,p)
     lattice, max_cluster = gen.generate()
-    scaled_lattice = gen.renorm_group(b, lattice)
-    #scaled_lattice1 = gen.coarse_graining(b, scaled_lattice)
-
+    scaled_lattice = gen.renorm_group(b, size, lattice)
+    scaled_lattice1 = gen.renorm_group(b, size1, scaled_lattice)
+    
     ax1.imshow(lattice, cmap="binary")
     ax2.imshow(scaled_lattice, cmap="binary")
-    #ax3.imshow(scaled_lattice1, cmap="binary")
+    ax3.imshow(scaled_lattice1, cmap="binary")
+
+    
+    scaled_lattice2 = gen.coarse_graining(b, lattice)
+    scaled_lattice12 = gen.coarse_graining(b, scaled_lattice2)
+    
+    ax4.imshow(lattice, cmap="binary")
+    ax5.imshow(scaled_lattice2, cmap="binary")
+    ax6.imshow(scaled_lattice12, cmap="binary")
 
 
-    plt.show()
+    plt.show() 
