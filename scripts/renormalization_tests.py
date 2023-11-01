@@ -198,9 +198,9 @@ if __name__ == '__main__':
 
     p = 0.59274605079210  #transition prob
     p=0.65
-    size, size1 = 50, 25
+    size, size1 = 60, 30
     b = 2 #normalization scaling value
-    rep = 5
+    rep = 50
     probs = np.arange(0.05,0.995,0.01)
     avg_sizes = np.zeros((len(probs), rep))
     avg_size1 = np.zeros((len(probs), rep))
@@ -231,9 +231,9 @@ if __name__ == '__main__':
 
             i += 1
     
-    ydata = np.average(avg_sizes,axis=1)
+    ydata = np.average(avg_size1,axis=1) / np.max(avg_size1)
     ppot,pcov = opt.curve_fit(func,probs,ydata)
-    plt.plot(probs, avg_size1/np.max(avg_size1), "k.", label="simulation results")
+    plt.plot(probs, ydata, "k.", label="simulation results")
     plt.plot(probs, probs, "b--", label="$p=p'$")
     plt.plot(probs, gen.renorm_group_prediction(probs, renorm_array), label="R(p)")
     plt.ylabel("Average Cluster Size, $\zeta_p$")
