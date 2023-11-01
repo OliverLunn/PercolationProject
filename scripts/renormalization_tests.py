@@ -186,10 +186,17 @@ class Percolation_2D:
         return average_size
     
     def renorm_group_prediction(self, probs, array):
+        """
+        Renormalization group predicition for the 2x2 blocking regime
+        """
         for p in probs:
             p_prime = p**4+4*p**3*(1-p)+2*p**2*(1-p)**2
             array = np.append(array, p_prime)
         return array
+
+
+def smoothclamp(x, mi, mx): 
+    return mi + (mx-mi)*(lambda t: np.where(t<0,0,np.where(t<= 1,3*t**2-2*t**3,1)))((x-mi)/(mx-mi))
 
 def func(p,a,b):
     return a*p**4+b*p**3*(1-p)
@@ -198,7 +205,7 @@ if __name__ == '__main__':
 
     p = 0.59274605079210  #transition prob
     p=0.65
-    size, size1 = 60, 30
+    size, size1 = 50,25
     b = 2 #normalization scaling value
     rep = 50
     probs = np.arange(0.05,0.995,0.01)
@@ -238,6 +245,8 @@ if __name__ == '__main__':
     plt.plot(probs, gen.renorm_group_prediction(probs, renorm_array), label="R(p)")
     plt.ylabel("Average Cluster Size, $\zeta_p$")
     plt.xlabel("Probability, $p$")
+
+    plt.plot(probs, smoothclamp(probs, np.min(ydata), np.max(ydata)))
     #plt.plot(probs, func(probs, *ppot)/np.max(avg_size1))
     plt.legend()
     plt.show()
