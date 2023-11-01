@@ -1,8 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import networkx as nx
-from scipy.spatial import Delaunay
-
+import scipy.spatial as spatial
 def assign_random_numbers(G):
     for node in G.nodes:
         G.nodes[node]['random_number'] = np.random.random()  # Assigning a random number to each node
@@ -19,7 +18,9 @@ def find_clusters(G):
     return clusters
 
 p=0.5
-G = nx.triangular_lattice_graph(50,75)
+m=5
+n=10
+G = nx.triangular_lattice_graph(m,n)
 G = assign_random_numbers(G)
 G = occupied(G,p)
 clusters = find_clusters(G)
@@ -34,8 +35,37 @@ for i, cluster in enumerate(clusters):
         cluster_edges = G.subgraph(cluster).edges()
         nx.draw_networkx_edges(G, pos=pos, edgelist=cluster_edges, edge_color='black',style='solid',width=1.5)
     
+positions = np.asarray(G.nodes)
+occs = np.asarray([G.nodes[node]['occupied'] for node in G.nodes])
+xs = positions[:,0]
+ys = positions[:,1]
+len_bot_row = np.count_nonzero(ys==0)
+len_sec_row = np.count_nonzero(ys==1)
+height = np.max(ys)
 
-#selected_nodes = G.subgraph([[0,1]])
+#scan on long row sites
+occupations = np.zeros((height+1,len_bot_row))
+for j in range(0,int(np.ceil(height/2))):
+    off = j*(len_sec_row+len_bot_row)
+    occupations[2*j,0:len_bot_row] = occs[off:off+len_bot_row]
+
+#scan short row sites
+for i in range(0,int(np.floor(height/2))+1):
+    off = len_bot_row + i*(len_sec_row+len_bot_row)
+    occupations[2*i+1,0:len_sec_row] = occs[off:off+len_sec_row]
+
+print(occupations)
+#find on edge triangles
+for j in range(0,height,2):
+    for i in range(0,(len_bot_row+1)//3):
+        tri = [occupations[j,i*3],occupations[j,(i*3)+1],occupations[1+j,i*3]]
+    
+#find off edge triangles
+for j in range(0,height//2):
+    for i in range(0,len_sec_row//3):
+        tri = [occupations[1+j*2,1+i*3],occupations[1+j*2,2+i*3],occupations[2+j*2,2+i*3]]
+        print(tri)
+
 plt.axis('square')
 plt.tight_layout()
 
