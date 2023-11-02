@@ -117,7 +117,7 @@ class Percolation2D:
             i_new+=1
         return scaled_lattice
 
-    def renorm_group(self, b, lattice):
+    def renorm_group(self, b, size, lattice):
         """
         Scales a lattice by grouping elements in blocks of size 'b' and applying a normalization rule.
 
@@ -133,7 +133,6 @@ class Percolation2D:
         in blocks of size 'b'. For each block, it applies a normalization rule based on the
         sum of elements in the block and specific conditions.
         """
-        size = self.size
         scaled_lattice = np.zeros((int(size/b), int(size/b)))
         i_new = 0
         for i in range(0, size-1, b):
