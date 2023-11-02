@@ -36,7 +36,7 @@ if __name__ == '__main__':
     fig.subplots_adjust(left=0.25, bottom=0.25) # Adjust the subplots region to leave some space for the sliders and buttons
 
     
-    prob_slider_ax  = fig.add_axes([0.25, 0.15, 0.65, 0.03])    #Define an axes area and draw a slider in it
+    prob_slider_ax  = fig.add_axes([0.25, 0.15, 0.65, 0.03])   #Define an axes area and draw a slider in it
     prob_slider = Slider(prob_slider_ax, 'Amp', 0.01, 1.0, valinit=p_c)
     reset_button_ax = fig.add_axes([0.8, 0.025, 0.1, 0.04])  # Add a button for resetting the parameters
     reset_button = Button(reset_button_ax, 'Reset', hovercolor='0.975')
