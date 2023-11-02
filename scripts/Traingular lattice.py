@@ -9,7 +9,7 @@ def assign_random_numbers(G):
 
 def occupied(G,p):
     for node in G.nodes:
-        G.nodes[node]['occupied'] = G.nodes[node]['random_number'] >= p
+        G.nodes[node]['occupied'] = G.nodes[node]['random_number'] <= p
     return G
 
 def find_clusters(G):
@@ -104,16 +104,28 @@ def renormalise(G,m,n):
     H = add_edges(H)
     return H
 
-p=0.5
-m=50
-n=150
-lat = nx.triangular_lattice_graph(m,n)
-lat = assign_random_numbers(lat)
-lat = occupied(lat,p)
+def clsuter_size(G):
+    clusters = find_clusters(G)
+    sizes = []
+    for i in range(0,len(clusters)):
+        sizes = np.append(sizes,len(clusters[i]))
+    return sizes
 
-H = renormalise(lat,m,n)
+probs=np.arange(0.1,0.9,0.05)
+m=150
+n=200
+runs=50
+avg_size=np.zeros((runs,len(probs)))
 
-figure , (ax1,ax2) = plt.subplots(1,2)
-plot(lat,ax1,'Origional Lattice')
-plot(H,ax2,'Renormalised Lattice')
+for j in range(0,runs):
+    i=0
+    lat = nx.triangular_lattice_graph(m,n)
+    lat = assign_random_numbers(lat)
+    for p in probs:
+        lat = occupied(lat,p)
+        sizes = clsuter_size(lat)
+        avg_size[j,i] = np.average(sizes)
+        i+=1
+
+plt.plot(probs,np.average(avg_size,axis=0))
 plt.show()
