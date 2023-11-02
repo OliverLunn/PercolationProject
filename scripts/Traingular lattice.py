@@ -42,21 +42,19 @@ def add_edges(G):
                 G.add_edge((x,y),new_node)
 
     new_nodes = G.nodes
-    
-
-
     return G
-def plot(G,title):
-    plt.figure()
-    plt.title(title)
+
+def plot(G,axis,title):
+
+    axis.set_title(title)
     pos = {node:G.nodes[node]['pos'] for node in G}
     node_colors = [G.nodes[node]['occupied'] for node in G.nodes]
     clusters = find_clusters(G)
-    nx.draw_networkx_nodes(G, pos=pos, node_color=node_colors, cmap=plt.get_cmap('winter'), node_size=25)
+    nx.draw_networkx_nodes(G, pos=pos, node_color=node_colors, cmap=plt.get_cmap('winter'), node_size=25, ax=axis)
     for i, cluster in enumerate(clusters):
         cluster_edges = G.subgraph(cluster).edges()
-        nx.draw_networkx_edges(G, pos=pos, edgelist=cluster_edges, edge_color='black',style='solid',width=1.5)
-    plt.axis('square')
+        nx.draw_networkx_edges(G, pos=pos, edgelist=cluster_edges, edge_color='black',style='solid',width=1.5,ax=axis)
+    axis.axis('square')
     plt.tight_layout()
 
 def renormalise(G,m,n):
@@ -107,13 +105,15 @@ def renormalise(G,m,n):
     return H
 
 p=0.5
-m=10
-n=20
+m=5
+n=15
 lat = nx.triangular_lattice_graph(m,n)
 lat = assign_random_numbers(lat)
 lat = occupied(lat,p)
 
 H = renormalise(lat,m,n)
-plot(lat,'Origional Lattice')
-plot(H,'Renormalised Lattice')
+
+figure , (ax1,ax2) = plt.subplots(1,2)
+plot(lat,ax1,'Origional Lattice')
+plot(H,ax2,'Renormalised Lattice')
 plt.show()
