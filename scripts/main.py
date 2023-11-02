@@ -5,89 +5,88 @@ import scipy.ndimage as ndimage
 from tqdm import tqdm
 import scipy.optimize as opt
 
-from PercolationProject.scripts import main
-Percolation = main.Percolation_2D()
-
-
-class Percolation_2D:
+class Percolation2D:
     """
     Class contiaing functions for simulating 2 dimensional percolation transitions
     """
-    def __init__(self,size,p):
+    def __init__(self):
         """
         initiliasiation function for the Percloation_2D object
         Inputs:
-            size    : Side length of the lattice
-            p       : probabilty of site being occupied
+            none 
         """
-        self.size = size
-        self.p = p
 
-    def lattice_random(self):
+    def lattice_random(self,size, p):
         
         """
         generates a 2d lattice of randomly distributed numbers 0 < x < 1.
         A random number < probability is the condition for occupation of a site
         Inputs:
-            None
+            size = lattice size [int]
+            p = probabiltity    [float]
         Returns:
             lattice : array of occupied/non-occupied sites
         -------
         """
         
-        rows, columns = self.size, self.size
+        rows, columns = size, size
 
         lattice = [[0 for i in range(rows)] for j in range(columns)]
         for i in range(rows):
             for j in range(columns):
-                lattice[i][j] = uniform(0,1) <= self.p
+                lattice[i][j] = uniform(0,1) <= p
         lattice = np.array(lattice) 
         lattice = np.where(lattice==0, -1, 1)
         return lattice
 
-    def cluster_search(self,lattice):
+    def cluster_search(self, lattice):
         """
         Searches lattice array of occupied sites for clusters.
         
         Inputs:
-            lattice : lattice of random numbers
+            lattice : lattice of random numbers [array]
             
         Returns:
-            labeled_lattice : lattice with individual clusters labelled 
+            labeled_lattice : lattice with individual clusters labelled [array]
 
         """
         lattice = np.where(lattice==-1, 0, 1)
         labeled_lattice, num = ndimage.label(lattice)
         return labeled_lattice    
         
-    def max_cluster(self,lattice):
+    def max_cluster(self, size, lattice):
         """
         Searches lattice array of occupied sites for largest cluster.
         
         Inputs:
+            size : lattice size [int]
             lattice : lattice of occupied/non-occupied sites [2d array]
             
         Returns:
             max_cluster : lattice with only max cluster [2d array] 
 
         """
-        count = np.bincount(np.reshape(lattice, self.size*self.size))
+        count = np.bincount(np.reshape(lattice, size*size))
         count[0] = 0
         max_cluster_id = np.argmax(count)
         max_cluster = np.where(lattice == max_cluster_id,1,0)
         
         return max_cluster
     
-    def generate(self):
+    def generate(self, size, p):
         """
         Function that generates a lattice and finds the maxium cluster size within the lattice
-        
+        Inputs:
+            size : lattice size [int]
+            p : probability [float]
+        Outputs:
+        Lattice, labeled_lattice, max_cluster
         """
-        lattice = self.lattice_random()
+        lattice = self.lattice_random(size, p)
         labeled_lattice = self.cluster_search(lattice)
-        max_cluster = self.max_cluster(labeled_lattice)
+        max_cluster = self.max_cluster(size, labeled_lattice)
 
-        return lattice, max_cluster
+        return lattice, labeled_lattice, max_cluster
     
     def coarse_graining(self, b, lattice):
         """
@@ -118,7 +117,7 @@ class Percolation_2D:
             i_new+=1
         return scaled_lattice
 
-    def renorm_group(self, b, size, lattice):
+    def renorm_group(self, b, lattice):
         """
         Scales a lattice by grouping elements in blocks of size 'b' and applying a normalization rule.
 
@@ -134,6 +133,7 @@ class Percolation_2D:
         in blocks of size 'b'. For each block, it applies a normalization rule based on the
         sum of elements in the block and specific conditions.
         """
+        size = self.size
         scaled_lattice = np.zeros((int(size/b), int(size/b)))
         i_new = 0
         for i in range(0, size-1, b):
@@ -206,38 +206,3 @@ class Percolation_2D:
             zeta = np.abs((p-p_c))**-1.34
             array = np.append(array, zeta)
         return array
-
-    
-if __name__ == '__main__':
-
-    p = 0.59274605079210  #transition prob
-    p=0.65
-    size, size1 = 50,25
-    b = 2 #normalization scaling value
-    rep = 50
-    probs = np.arange(0.05,0.995,0.01)
-    avg_sizes = np.zeros((len(probs), rep))
-    avg_size1 = np.zeros((len(probs), rep))
-    renorm_array = []
-
-    for r in tqdm(range(0,rep)):
-        i=0
-        for p in probs:
-            gen = Percolation_2D(size,p)
-            lattice = gen.lattice_random()
-            labeled_lattice = gen.cluster_search(lattice)
-            avg_sizes[i,r] = gen.average_cluster_size(labeled_lattice)
-            lattice_renorm = gen.renorm_group(b, size, lattice)
-            lattice_renorm_lab = gen.cluster_search(lattice_renorm)
-            avg_size1[i,r] = gen.average_cluster_size(lattice_renorm_lab)
-
-            i += 1
-    
-    ydata = np.average(avg_size1,axis=1) / np.max(avg_size1)
-    plt.plot(probs, ydata, "k.", label="simulation results")
-    plt.plot(probs, probs, "b--", label="$p=p'$")
-    plt.plot(probs, gen.renorm_group_prediction(probs, renorm_array), label="R(p)")
-    plt.ylabel("Average Cluster Size, $\zeta_p$")
-    plt.xlabel("Probability, $p$")
-    plt.legend()
-    plt.show()
