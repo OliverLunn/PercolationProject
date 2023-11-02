@@ -5,7 +5,6 @@ from random import uniform
 import scipy.ndimage as ndimage
 from tqdm import tqdm
 import scipy.optimize as opt
-import numexpr as ne
 
 
 from main import Percolation2D
@@ -22,7 +21,7 @@ if __name__ == '__main__':
     p = 0.59274605079210  #transition prob
     size, size1 = 50, 80
     b = 2 #renormalization scaling value
-    rep = 50
+    rep = 5
     probs = np.arange(0.05,0.995,0.01)
 
     avg_sizes = np.zeros((len(probs), rep))
