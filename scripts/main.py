@@ -3,8 +3,6 @@ FILE CONTAINING CLASS TO RUN PERCOLATION SIMULATIONS
     all methods required to run simulations on 1d and 2d lattices in this file
 
 '''
-
-
 import numpy as np
 import matplotlib.pyplot as plt
 from random import uniform
@@ -200,7 +198,7 @@ class Percolation2D:
         Renormalization group predicition for the 2x2 blocking regime
         """
         for p in probs:
-            p_prime = p**4+4*p**3*(1-p)+2*p**2*(1-p)**2
+            p_prime = p**4+4*p**3*(1-p)+4*p**2*(1-p)**2
             array = np.append(array, p_prime)
         return array
     
