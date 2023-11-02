@@ -188,7 +188,7 @@ class Percolation2D:
         
         return average_size
     
-    def renorm_group_prediction(self, probs, array):
+    def renorm_group_theory(self, probs, array):
         """
         Renormalization group predicition for the 2x2 blocking regime
         """
@@ -201,7 +201,41 @@ class Percolation2D:
         return (x)**(-gamma)
 
     def diverge(self, probs, p_c, array):
+        '''
+        Generates an array of occupation probailities v prob for 1d lattice
+        Inputs:
+            probs : array of probabilities [array]
+            p_c : critical probability [float]
+            array : empty array for data storage [np.array]
+        '''
         for p in probs:
             zeta = np.abs((p-p_c))**-1.34
             array = np.append(array, zeta)
         return array
+    
+    def gamma(self, probs, L, gamma_array):
+        """
+        1D critical exponenet plot
+        Inputs:
+            probs : array of probabilities [nupmy.array]
+            L : length of lattice [int]
+            gamma_array : empty array [array]
+        Returns:
+        gamma_array : array of gamma critical exponent values
+    
+        """
+        for p in probs:
+            gamma = p**L
+            gamma_array = np.append(gamma_array, gamma)
+
+        return gamma_array
+    
+    def cluster_size(self, probs, p_c):
+        """
+        Theory predicitions of cluster size
+        Inputs:
+            probs : array of probabilities
+            p_c : critical probability
+        """
+        cluster = (p_c - probs)**-1
+        return cluster

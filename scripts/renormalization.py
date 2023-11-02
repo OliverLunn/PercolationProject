@@ -1,3 +1,4 @@
+#import modules
 import numpy as np
 import matplotlib.pyplot as plt
 from random import uniform
@@ -5,7 +6,6 @@ import scipy.ndimage as ndimage
 from tqdm import tqdm
 import scipy.optimize as opt
 from main import Percolation2D
-
 
 if __name__ == '__main__':
 
