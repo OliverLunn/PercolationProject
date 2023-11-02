@@ -1,3 +1,10 @@
+'''
+FILE CONTAINING CLASS TO RUN PERCOLATION SIMULATIONS
+    all methods required to run simulations on 1d and 2d lattices in this file
+
+'''
+
+
 import numpy as np
 import matplotlib.pyplot as plt
 from random import uniform
@@ -202,7 +209,7 @@ class Percolation2D:
 
     def diverge(self, probs, p_c, array):
         '''
-        Generates an array of occupation probailities v prob for 1d lattice
+        Generates an array of occupation probailities vs prob for 1d lattice
         Inputs:
             probs : array of probabilities [array]
             p_c : critical probability [float]

@@ -105,8 +105,8 @@ def renormalise(G,m,n):
     return H
 
 p=0.5
-m=5
-n=15
+m=50
+n=150
 lat = nx.triangular_lattice_graph(m,n)
 lat = assign_random_numbers(lat)
 lat = occupied(lat,p)
