@@ -185,8 +185,8 @@ class Percolation2D:
             s=int(s)
             cluster_number[s] = cluster_number[s] + 1
             occupation_prob = occupation_prob + (s*cluster_number[s])
-        
         average_size = 0
+
         for s in clust_size:
             s=int(s)
             average_size = average_size + (1/occupation_prob)*(s**2)*cluster_number[s]
