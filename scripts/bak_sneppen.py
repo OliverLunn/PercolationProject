@@ -5,21 +5,22 @@ File contains code to simulate the Bak-Sneppen evolution model.
 import numpy as np
 import matplotlib.pyplot as plt
 import math
-def bak_sneppen(npoints, max_gen, neighbour_size=1, neighbour_prob=1):
+
+def bak_sneppen(npoints, max_gen, neighbour_size=2, neighbour_prob=1):
     """
     Function that simulates the Bak-Sneppen algorithm
 
     Inputs:
         npoints : size of population [int]
         max_gen : "lifetime of population" [int]
-        neighbour_size : size of neighbour species to be eliminated [int, default=1]
+        neighbour_size : size of neighbour species to be eliminated [int, default=2]
         neighbour_prob : probability that neighbour is eliminated [int:, default=1]
 
     Outputs:
         [x,ages_start, ages_end]
     
     """
-    age_size = 100
+    age_size = 300
     ages = np.zeros(npoints)
     ages_start = np.zeros((age_size, npoints))
     ages_end = np.zeros((age_size, npoints))
@@ -35,16 +36,17 @@ def bak_sneppen(npoints, max_gen, neighbour_size=1, neighbour_prob=1):
         if np.random.rand(1) < p1:
 
             B[idx] = np.random.rand(1)
-            ages[idx] = 0  #reset "age"
+            ages[idx] = 0  #reset "age" of point
 
-        for d in range(1,1+math.floor(neighbour_size/2)):
+        for d in range(1, 1+math.floor(neighbour_size / 2)):
                         if np.random.rand(1) < neighbour_prob:
 
                             B[(idx + d) % npoints] = np.random.rand(1)
                             ages[(idx + d) % npoints] = 0
-
+                        if np.random.rand(1) < neighbour_prob:
                             B[(idx - d) % npoints] = np.random.rand(1)
-                            ages[(idx + d) % npoints] = 0
+                            ages[(idx - d) % npoints] = 0
+
         x[t] = np.mean(B)
 
         if t < age_size:
@@ -55,17 +57,35 @@ def bak_sneppen(npoints, max_gen, neighbour_size=1, neighbour_prob=1):
             for i in range(npoints):
                 ages_end[t-max_gen, i] = ages[i]
                 
-    return [x, ages_start, ages_end]
+    return [x, ages_start, ages_end, B]
 
 
 if __name__ == '__main__':
 
-    npoints, max_gen = 100, 10000
-    [x, ages_start, ages_end] = bak_sneppen(npoints, max_gen)
+    npoints, max_gen = 300, 10000
+    [x, ages_start, ages_end, B] = bak_sneppen(npoints, max_gen)
 
     fig, (ax1) = plt.subplots(1,1)
-    ax1.imshow(ages_start / np.max(ages_start), cmap='hot_r', vmin=0, vmax=1)
+
+    fig1, (ax2,ax3) = plt.subplots(1,2)
+
+    ax1.imshow(ages_start / np.max(ages_start), cmap="jet")
     ax1.set_xticks([])
     ax1.set_xlabel('Species')
     ax1.set_ylabel('Generations')
+    ax1.set_aspect("equal")
+
+    ax2.plot(range(len(x)), x)
+    ax2.set_xlabel("survival time")
+    ax2.set_ylabel("fitness barrier, B(x)")
+    ax2.set_xscale("log")
+    ax2.set_yscale("log")
+
+    ax3.plot(B, "k.")
+    ax3.hlines(2/3, 0, npoints)
+    ax3.set_xlim(0,npoints+1)
+    ax3.set_ylim(0,1.1)
+    ax3.set_xlabel("points")
+    ax3.set_ylabel("fitness barrier, B(x)")
+
     plt.show()
