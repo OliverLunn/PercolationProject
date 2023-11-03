@@ -58,7 +58,7 @@ def plot(G,axis,title):
     plt.tight_layout()
 
 def renormalise(G,m,n):
-    positions = np.asarray(lat.nodes)
+    positions = np.asarray(G.nodes)
     occs = np.asarray([G.nodes[node]['occupied'] for node in G.nodes])
     xs = positions[:,0]
     ys = positions[:,1]
@@ -111,21 +111,50 @@ def clsuter_size(G):
         sizes = np.append(sizes,len(clusters[i]))
     return sizes
 
-probs=np.arange(0.1,0.9,0.05)
-m=150
-n=200
-runs=50
-avg_size=np.zeros((runs,len(probs)))
+def average_clust_size(G):
+    num_nodes = G.number_of_nodes()
+    sizes = clsuter_size(G)
+    cluster_size_dist = np.zeros(int(np.max(sizes))+1)     #N_s(p,L)
+    for size in sizes:
+        cluster_size_dist[int(size)] = cluster_size_dist[int(size)] + 1   #N_s(p,L)
+    cluster_size_density = cluster_size_dist/num_nodes  #n_s(p,L)
+    
+    occupation_prob = 0
+    for size in sizes:
+        occupation_prob = occupation_prob + size*cluster_size_density[int(size)]
 
-for j in range(0,runs):
+    average_size = 0
+    for size in sizes:
+        average_size = average_size + size*size*cluster_size_density[int(size)]
+
+    average_size = (1/occupation_prob) * average_size
+    return average_size
+    
+probs=np.arange(0.1,1,0.05)
+m=100
+n=100
+runs=5
+S = np.zeros((runs,len(probs)))
+for run in range(0,runs):
     i=0
-    lat = nx.triangular_lattice_graph(m,n)
-    lat = assign_random_numbers(lat)
     for p in probs:
-        lat = occupied(lat,p)
-        sizes = clsuter_size(lat)
-        avg_size[j,i] = np.average(sizes)
-        i+=1
+        G = nx.triangular_lattice_graph(m,n)
+        G = assign_random_numbers(G)
+        G = occupied(G,p)
 
-plt.plot(probs,np.average(avg_size,axis=0))
+        average_size = average_clust_size(G)
+        S[run,i] = average_size
+        i += 1
+fig = plt.figure()
+ax = plt.axes()
+ax.plot(probs,np.average(S,axis=0))
+#p=0.5
+#G = nx.triangular_lattice_graph(m,n)
+#G = assign_random_numbers(G)
+#G = occupied(G,p)
+
+#H = renormalise(G,m,n)
+#fig, (ax1,ax2) = plt.subplots(1,2)
+#plot(G,ax1,'origional lattice')
+#plot(H,ax2,'renormalised lattice')
 plt.show()
