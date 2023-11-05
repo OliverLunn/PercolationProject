@@ -31,21 +31,21 @@ def bak_sneppen(npoints, max_gen, min_b_a, neighbour_size=2, neighbour_prob=1):
     for t in range(max_gen):     #iterate over time
         ages += 1
         
-        if np.random.rand(1) < p1:
+        if np.random.random(1) < p1:
 
             idx = np.argmin(B)  #find min B(x)
             min_B = np.min(B)
             min_b_a = np.append(min_b_a, min_B)
 
-            B[idx] = np.random.rand(1)
+            B[idx] = np.random.random(1)
             ages[idx] = 0  #reset "age" of point
 
         for d in range(1, 1+math.floor(neighbour_size / 2)):
-                        if np.random.rand(1) < neighbour_prob:
-                            B[(idx + d) % npoints] = np.random.rand(1)
+                        if np.random.random(1) < neighbour_prob:
+                            B[(idx + d) % npoints] = np.random.random(1)
                             ages[(idx + d) % npoints] = 0
-                        if np.random.rand(1) < neighbour_prob:
-                            B[(idx - d) % npoints] = np.random.rand(1)
+                        if np.random.random(1) < neighbour_prob:
+                            B[(idx - d) % npoints] = np.random.random(1)
                             ages[(idx - d) % npoints] = 0
 
         x[t] = np.mean(B)
@@ -90,7 +90,6 @@ if __name__ == '__main__':
     ax3.set_ylim(0,1.1)
     ax3.set_xlabel("points")
     ax3.set_ylabel("fitness barrier, B(x)")
-
 
     ax4.hist(B, bins=30, density=True, histtype="step", color="k")
     ax4.hist(min_b_a, bins=30, density=True, histtype="step", color="k")
