@@ -33,10 +33,9 @@ if __name__ == '__main__':
         for p in probs:
             lattice = percolation2d.lattice_random(size, p)
             labeled_lattice = percolation2d.cluster_search(lattice)
-            avg_size[i,r] = percolation2d.average_cluster_size(labeled_lattice)
+            avg_size[i,r] = percolation2d.average_cluster_size(lattice)
             lattice_renorm = percolation2d.renorm_group(b, size, lattice)
-            lattice_renorm_lab = percolation2d.cluster_search(lattice_renorm)
-            avg_size1[i,r] = percolation2d.average_cluster_size(lattice_renorm_lab)
+            avg_size1[i,r] = percolation2d.average_cluster_size(lattice_renorm)
 
             i += 1
     ydata = np.average(avg_size,axis=1) / np.max(avg_size)

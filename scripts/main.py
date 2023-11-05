@@ -170,28 +170,19 @@ class Percolation2D:
 
         return scaled_lattice
     
-    def average_cluster_size(self, labeled_lattice):
+    def average_cluster_size(self, lattice):
+        m = np.where(lattice==-1, False, True)
+        lw, num = ndimage.label(m)
+        labelList = np.arange(lw.max() + 1)
+        area = ndimage.sum_labels(m, lw, labelList)
+        # Remove spanning cluster by setting its area to zero
+        perc_x = np.intersect1d(lw[0,:],lw[-1,:])
+        perc = perc_x[np.where(perc_x>0)]
+        if (len(perc)>0):
+            area[perc[0]] = 0
+        S = sum(area*area)
         
-        clust_id = np.arange(1,np.max(labeled_lattice)+1)
-        clust_size = np.zeros(np.max(labeled_lattice))
-        
-        for id in clust_id:
-            clust_size[id-1] = int(len(np.where(labeled_lattice==id)[0]))
-        
-        cluster_number = np.zeros(int(np.max(clust_size))+1)
-        occupation_prob = 0
-
-        for s in clust_size:
-            s=int(s)
-            cluster_number[s] = cluster_number[s] + 1
-            occupation_prob = occupation_prob + (s*cluster_number[s])
-        average_size = 0
-
-        for s in clust_size:
-            s=int(s)
-            average_size = average_size + (1/occupation_prob)*(s**2)*cluster_number[s]
-        
-        return average_size
+        return S
     
     def renorm_group_theory(self, probs, array):
         """
