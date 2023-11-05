@@ -1,12 +1,11 @@
 """
 File contains code to simulate the Bak-Sneppen evolution model.
 """
-
 import numpy as np
 import matplotlib.pyplot as plt
 import math
 
-def bak_sneppen(npoints, max_gen, neighbour_size=2, neighbour_prob=1):
+def bak_sneppen(npoints, max_gen, min_b_a, neighbour_size=2, neighbour_prob=1):
     """
     Function that simulates the Bak-Sneppen algorithm
 
@@ -20,7 +19,7 @@ def bak_sneppen(npoints, max_gen, neighbour_size=2, neighbour_prob=1):
         [x,ages_start, ages_end]
     
     """
-    age_size = 300
+    age_size = 900
     ages = np.zeros(npoints)
     ages_start = np.zeros((age_size, npoints))
     ages_end = np.zeros((age_size, npoints))
@@ -29,18 +28,20 @@ def bak_sneppen(npoints, max_gen, neighbour_size=2, neighbour_prob=1):
     B = np.random.rand(npoints)     #assign random B(x)
     p1 = 1
 
-    for t in range(max_gen):        #iterate over time
+    for t in range(max_gen):     #iterate over time
         ages += 1
-
-        idx = np.argmin(B) #find min B(x)
+        
         if np.random.rand(1) < p1:
+
+            idx = np.argmin(B)  #find min B(x)
+            min_B = np.min(B)
+            min_b_a = np.append(min_b_a, min_B)
 
             B[idx] = np.random.rand(1)
             ages[idx] = 0  #reset "age" of point
 
         for d in range(1, 1+math.floor(neighbour_size / 2)):
                         if np.random.rand(1) < neighbour_prob:
-
                             B[(idx + d) % npoints] = np.random.rand(1)
                             ages[(idx + d) % npoints] = 0
                         if np.random.rand(1) < neighbour_prob:
@@ -57,17 +58,19 @@ def bak_sneppen(npoints, max_gen, neighbour_size=2, neighbour_prob=1):
             for i in range(npoints):
                 ages_end[t-max_gen, i] = ages[i]
                 
-    return [x, ages_start, ages_end, B]
+    return [x, ages_start, ages_end, B, min_b_a]
 
 
 if __name__ == '__main__':
 
-    npoints, max_gen = 300, 10000
-    [x, ages_start, ages_end, B] = bak_sneppen(npoints, max_gen)
+    npoints, max_gen = 350, 200000
+    min_b_a = []
+    [x, ages_start, ages_end, B, min_b_a] = bak_sneppen(npoints, max_gen, min_b_a)
 
     fig, (ax1) = plt.subplots(1,1)
 
     fig1, (ax2,ax3) = plt.subplots(1,2)
+    fig2, (ax4,ax5) = plt.subplots(1,2)
 
     ax1.imshow(ages_start / np.max(ages_start), cmap="jet")
     ax1.set_xticks([])
@@ -88,4 +91,7 @@ if __name__ == '__main__':
     ax3.set_xlabel("points")
     ax3.set_ylabel("fitness barrier, B(x)")
 
+    ax4.hist(B, bins=30, histtype="step")
+    ax5.hist(min_b_a, histtype="step")
+    ax5.vlines(0.667, 0,100)
     plt.show()
