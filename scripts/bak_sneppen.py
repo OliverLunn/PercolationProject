@@ -19,7 +19,7 @@ def bak_sneppen(npoints, max_gen, min_b_a, neighbour_size=2, neighbour_prob=1):
         [x,ages_start, ages_end]
     
     """
-    age_size = 900
+    age_size = 1000
     ages = np.zeros(npoints)
     ages_start = np.zeros((age_size, npoints))
     ages_end = np.zeros((age_size, npoints))
@@ -63,14 +63,14 @@ def bak_sneppen(npoints, max_gen, min_b_a, neighbour_size=2, neighbour_prob=1):
 
 if __name__ == '__main__':
 
-    npoints, max_gen = 350, 200000
+    npoints, max_gen = 500, 220000
     min_b_a = []
     [x, ages_start, ages_end, B, min_b_a] = bak_sneppen(npoints, max_gen, min_b_a)
 
     fig, (ax1) = plt.subplots(1,1)
 
     fig1, (ax2,ax3) = plt.subplots(1,2)
-    fig2, (ax4,ax5) = plt.subplots(1,2)
+    fig2, (ax4) = plt.subplots(1,1)
 
     ax1.imshow(ages_start / np.max(ages_start), cmap="jet")
     ax1.set_xticks([])
@@ -91,7 +91,9 @@ if __name__ == '__main__':
     ax3.set_xlabel("points")
     ax3.set_ylabel("fitness barrier, B(x)")
 
-    ax4.hist(B, bins=30, histtype="step")
-    ax5.hist(min_b_a, histtype="step")
-    ax5.vlines(0.667, 0,100)
+
+    ax4.hist(B, bins=30, density=True, histtype="step", color="k")
+    ax4.hist(min_b_a, bins=30, density=True, histtype="step", color="k")
+    ax4.set_ylabel("P(B)")
+    ax4.set_xlabel("B")
     plt.show()
