@@ -113,44 +113,32 @@ def clsuter_size(G):
 
 def average_clust_size(G,m,n):
     num_nodes = G.number_of_nodes()
+    positions = np.asarray(G.nodes)
+    occs = np.asarray([G.nodes[node]['occupied'] for node in G.nodes])
+    xs = positions[:,0]
+    ys = positions[:,1]
     height = m+1
     len_bot_row = (n+1)//2 + 1
-    if n//2==0:
-        len_sec_row = len_bot_row
-    else:
-        len_sec_row = len_bot_row-1
-    edges=[]
-    for y in range(0,height):
-        edges = np.append(edges,(0,y)) #left edge
+    lattice = np.zeros((height,len_bot_row))
+    for i in range(0,len(occs)):
+        lattice[ys[i],xs[i]] = occs[i]
+    
+    
+    clusters = np.asarray(find_clusters(G))
+    labeled_lattice = np.zeros((height,len_bot_row))
+    for clust_num in range(0,len(clusters)):
+        for point in clusters[clust_num]:
+            labeled_lattice[point[1],point[0]]==clust_num + 1
+    print(labeled_lattice)
+        
 
-        #right edge
-        if y//2==0:
-            edges = np.append(edges,(len_bot_row-1,y))
-        elif y//2 !=0:
-            edges = np.append(edges,(len_sec_row-1,y))
-     
-    for x in range(0,len_bot_row):
-        edges = np.append(edges,(x,0))#bottom edge
 
-        #top edge
-        if height//2 == 0:
-            edges = np.append(edges,(x,height-1))
-        elif height//2 != 0:
-            if x<len_sec_row-1:
-                edges = np.append(edges,(x,height-1))
 
-    edges = list(dict.fromkeys(edges)) #reomve repeats
-    print(edges)
-    sizes = clsuter_size(G)
-    S=[]
-    for size in sizes:
-        S = size**2/num_nodes
-
-case = 'r'
+case = 't'
 if case == 's':
     probs=np.arange(0.1,1,0.05)
     m=100
-    n=100
+    n=100 #make sure this is even
     runs=5
     S = np.zeros((runs,len(probs)))
     fig = plt.figure()
@@ -177,8 +165,6 @@ if case == 'r':
     p=0.5
     m=12
     n=12
-    print(m+1)
-    print((n+1)//2 + 1)
     G = nx.triangular_lattice_graph(m,n)
     G = assign_random_numbers(G)
     G = occupied(G,p)
@@ -189,32 +175,16 @@ if case == 'r':
     plot(H,ax2,'renormalised lattice')
 
 
-    height = m+1
-    len_bot_row = (n+1)//2 + 1
-    if n//2==0:
-        len_sec_row = len_bot_row
-    else:
-        len_sec_row = len_bot_row-1
-    edges=[]
-    for y in range(0,height):
-        edges = np.append(edges,(0,y)) #left edge
+if case == 't':
+    p=0.5
+    m=12
+    n=12
+    G = nx.triangular_lattice_graph(m,n)
+    G = assign_random_numbers(G)
+    G = occupied(G,p)
+    average_clust_size(G,m,n)
+    plt.figure()
+    ax = plt.axes()
+    plot(G,ax,'')
 
-        #right edge
-        if y//2==0:
-            edges = np.append(edges,(len_bot_row-1,y),)
-        elif y//2 !=0:
-            edges = np.append(edges,(len_sec_row-1,y),)
-     
-    for x in range(0,len_bot_row):
-        edges = np.append(edges,(x,0))#bottom edge
-
-        #top edge
-        if height//2 == 0:
-            edges = np.append(edges,(x,height-1))
-        elif height//2 != 0:
-            if x<len_sec_row-1:
-                edges = np.append(edges,(x,height-1))
-
-    
-    print(edges)
-    plt.show()
+plt.show()
