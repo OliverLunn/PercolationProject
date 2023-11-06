@@ -106,4 +106,5 @@ if __name__ == '__main__':
     
     ax4.vlines(0.66, 0, 4, "r", linestyle="dashed")
     ax5.vlines(0.66, 0, 3.5, "r", linestyle="dashed")
+
     plt.show()

@@ -170,7 +170,7 @@ class Percolation2D:
 
         return scaled_lattice
     
-    def average_cluster_size(self, lattice):
+    def average_cluster_size(self, lattice, size):
         m = np.where(lattice==-1, False, True)
         lw, num = ndimage.label(m)
         labelList = np.arange(lw.max() + 1)
@@ -180,7 +180,7 @@ class Percolation2D:
         perc = perc_x[np.where(perc_x>0)]
         if (len(perc)>0):
             area[perc[0]] = 0
-        S = sum(area*area)
+        S = sum(area*area) / size**2
         
         return S
     
