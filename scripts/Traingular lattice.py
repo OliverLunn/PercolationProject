@@ -2,6 +2,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import networkx as nx
 import scipy.spatial as spatial
+from scipy import ndimage
+import scipy.optimize as opt
+from tqdm import tqdm
+
 def assign_random_numbers(G):
     for node in G.nodes:
         G.nodes[node]['random_number'] = np.random.random()  # Assigning a random number to each node
@@ -119,47 +123,76 @@ def average_clust_size(G,m,n):
     ys = positions[:,1]
     height = m+1
     len_bot_row = (n+1)//2 + 1
+    len_sec_row = np.count_nonzero(ys==1)
+
     lattice = np.zeros((height,len_bot_row))
     for i in range(0,len(occs)):
         lattice[ys[i],xs[i]] = occs[i]
-    
-    
-    clusters = np.asarray(find_clusters(G))
+
     labeled_lattice = np.zeros((height,len_bot_row))
-    for clust_num in range(0,len(clusters)):
-        for point in clusters[clust_num]:
-            labeled_lattice[point[1],point[0]]==clust_num + 1
-    print(labeled_lattice)
+    clusters = np.asarray(find_clusters(G))
+    for i in range(0,len(clusters)):
+        cluster = list(clusters[i])
+        for j in range(0,len(cluster)):
+            x = cluster[j][0]
+            y = cluster[j][1]
+            labeled_lattice[y,x] = i+1
+    labelList = np.arange(labeled_lattice.max() + 1) #create list of labels
+    area = ndimage.sum_labels(lattice, labeled_lattice, labelList)
+    # Remove spanning cluster by setting its area to zero
+    perc_x = np.intersect1d(labeled_lattice[0,:],labeled_lattice[-1,:])
+    perc = perc_x[np.where(perc_x>0)]
+    
+    if (len(perc)>0):
+        area[int(perc[0])] = 0
+    S = (sum(area*area))/num_nodes
+    return S
         
 
-
-
-case = 't'
+case = 's'
 if case == 's':
-    probs=np.arange(0.1,1,0.05)
+    probs=np.arange(0.1,0.7,0.005)
     m=100
-    n=100 #make sure this is even
-    runs=5
+    n=100
+    runs=25
     S = np.zeros((runs,len(probs)))
-    fig = plt.figure()
-    ax = plt.axes()
-    ax.set_xlabel('P')
-    ax.set_ylabel('Average Cluster Size')
-    for run in range(0,runs):
+
+    for run in tqdm(range(0,runs)):
         i=0
+        G = nx.triangular_lattice_graph(m,n)
+        G = assign_random_numbers(G)
         for p in probs:
-            G = nx.triangular_lattice_graph(m,n)
-            G = assign_random_numbers(G)
             G = occupied(G,p)
 
-            average_size = average_clust_size(G)
-            S[run,i] = average_size
+            S[run,i]  = average_clust_size(G,m,n)
             i += 1
-        ax.scatter(probs,S[run,:],marker='.')
 
-    ax.plot(probs,np.average(S,axis=0),color='black',label=f'Average over {runs} runs')
-    ax.vlines(0.5,np.min(np.average(S,axis=0)),np.max(np.average(S,axis=0)),color='black',linestyle='--',label='P_c')
-    ax.legend()
+    fig, (ax1,ax2)= plt.subplots(1,2)
+    
+    ax1.set_xlabel('$P$')
+    ax1.set_ylabel('$S(p,L)$')
+    ax1.plot(probs,np.average(S,axis=0),color='black',label=f'Average over {runs} runs')
+    ax1.vlines(0.5,np.min(np.average(S,axis=0)),np.max(np.average(S,axis=0)),color='black',linestyle='--',label='P_c')
+    ax1.legend()
+
+    ax2.set_xlabel('$log(|P-P_c|)$')
+    ax2.set_ylabel('$log(S(p.L))$')
+
+    def func(x,m,c):
+        return m*x + c
+    
+    indx = np.where(probs<0.5)
+    p_c = 0.5
+    xdata = []
+    ydata = []
+    for i in indx:
+        xdata = np.append(xdata,np.log(np.abs(probs[i]-p_c)))
+        ydata = np.append(ydata,np.log(np.average(S[:,i],axis=0)))
+
+    ppot,pcov = opt.curve_fit(func,xdata,ydata)
+    ax2.plot(xdata,ydata,color='blue')
+    ax2.plot(xdata,func(xdata,*ppot),color='black')
+    print(ppot)
 
 if case == 'r':
     p=0.5
@@ -174,17 +207,5 @@ if case == 'r':
     plot(G,ax1,'origional lattice')
     plot(H,ax2,'renormalised lattice')
 
-
-if case == 't':
-    p=0.5
-    m=12
-    n=12
-    G = nx.triangular_lattice_graph(m,n)
-    G = assign_random_numbers(G)
-    G = occupied(G,p)
-    average_clust_size(G,m,n)
-    plt.figure()
-    ax = plt.axes()
-    plot(G,ax,'')
 
 plt.show()
