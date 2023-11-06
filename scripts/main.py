@@ -206,7 +206,6 @@ class Percolation2D:
         perc_x = np.intersect1d(lw[0,:],lw[-1,:])
         perc = perc_x[np.where(perc_x>0)]
         if (len(perc)>0):
-            print(perc[0])
             area[perc[0]] = 0
         S = sum(area*area)
         
