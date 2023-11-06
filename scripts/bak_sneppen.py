@@ -4,6 +4,7 @@ File contains code to simulate the Bak-Sneppen evolution model.
 import numpy as np
 import matplotlib.pyplot as plt
 import math
+from tqdm import tqdm
 
 def bak_sneppen(npoints, max_gen, min_b_a, neighbour_size=2, neighbour_prob=1):
     """
@@ -62,10 +63,18 @@ def bak_sneppen(npoints, max_gen, min_b_a, neighbour_size=2, neighbour_prob=1):
 
 
 if __name__ == '__main__':
+    j=0
+    data = [[]]
 
-    npoints, max_gen = 900, 300000
-    min_b_a = []
-    [x, ages_start, ages_end, B, min_b_a] = bak_sneppen(npoints, max_gen, min_b_a)
+
+    for i in tqdm(range(0, 1)):
+        npoints, max_gen = 1000, 200000
+        min_b_a = []
+        [x, ages_start, ages_end, B, min_b_a] = bak_sneppen(npoints, max_gen, min_b_a)
+        data[int(j)] = B
+        j+=1
+
+    data_b = np.average(data, axis=0)
 
     fig, (ax1) = plt.subplots(1,1)
 
@@ -91,7 +100,7 @@ if __name__ == '__main__':
     ax3.set_xlabel("points")
     ax3.set_ylabel("fitness barrier, B(x)")
 
-    ax4.hist(B, bins=30, density=True, histtype="step", color="k")
+    ax4.hist(data_b, bins=30, density=True, histtype="step", color="k")
     ax5.hist(min_b_a, bins=30, density=True, histtype="step", color="k")
 
     ax4.set_ylabel("P(B)", fontsize="20")
@@ -100,9 +109,9 @@ if __name__ == '__main__':
     ax5.set_xlabel("B", fontsize="20")
 
     ax4.set_xlim(0,1)
-    ax4.set_ylim(0,4)
+    #ax4.set_ylim(0,4)
     ax5.set_xlim(0,1)
-    ax5.set_ylim(0,3.5)
+    #ax5.set_ylim(0,3.5)
     
     ax4.vlines(0.66, 0, 4, "r", linestyle="dashed")
     ax5.vlines(0.66, 0, 3.5, "r", linestyle="dashed")
