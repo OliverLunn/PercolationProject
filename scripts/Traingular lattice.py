@@ -111,58 +111,110 @@ def clsuter_size(G):
         sizes = np.append(sizes,len(clusters[i]))
     return sizes
 
-def average_clust_size(G):
+def average_clust_size(G,m,n):
     num_nodes = G.number_of_nodes()
+    height = m+1
+    len_bot_row = (n+1)//2 + 1
+    if n//2==0:
+        len_sec_row = len_bot_row
+    else:
+        len_sec_row = len_bot_row-1
+    edges=[]
+    for y in range(0,height):
+        edges = np.append(edges,(0,y)) #left edge
+
+        #right edge
+        if y//2==0:
+            edges = np.append(edges,(len_bot_row-1,y))
+        elif y//2 !=0:
+            edges = np.append(edges,(len_sec_row-1,y))
+     
+    for x in range(0,len_bot_row):
+        edges = np.append(edges,(x,0))#bottom edge
+
+        #top edge
+        if height//2 == 0:
+            edges = np.append(edges,(x,height-1))
+        elif height//2 != 0:
+            if x<len_sec_row-1:
+                edges = np.append(edges,(x,height-1))
+
+    edges = list(dict.fromkeys(edges)) #reomve repeats
+    print(edges)
     sizes = clsuter_size(G)
-    cluster_size_dist = np.zeros(int(np.max(sizes))+1)     #N_s(p,L)
+    S=[]
     for size in sizes:
-        cluster_size_dist[int(size)] = cluster_size_dist[int(size)] + 1   #N_s(p,L)
-    cluster_size_density = cluster_size_dist/num_nodes  #n_s(p,L)
+        S = size**2/num_nodes
+
+case = 'r'
+if case == 's':
+    probs=np.arange(0.1,1,0.05)
+    m=100
+    n=100
+    runs=5
+    S = np.zeros((runs,len(probs)))
+    fig = plt.figure()
+    ax = plt.axes()
+    ax.set_xlabel('P')
+    ax.set_ylabel('Average Cluster Size')
+    for run in range(0,runs):
+        i=0
+        for p in probs:
+            G = nx.triangular_lattice_graph(m,n)
+            G = assign_random_numbers(G)
+            G = occupied(G,p)
+
+            average_size = average_clust_size(G)
+            S[run,i] = average_size
+            i += 1
+        ax.scatter(probs,S[run,:],marker='.')
+
+    ax.plot(probs,np.average(S,axis=0),color='black',label=f'Average over {runs} runs')
+    ax.vlines(0.5,np.min(np.average(S,axis=0)),np.max(np.average(S,axis=0)),color='black',linestyle='--',label='P_c')
+    ax.legend()
+
+if case == 'r':
+    p=0.5
+    m=12
+    n=12
+    print(m+1)
+    print((n+1)//2 + 1)
+    G = nx.triangular_lattice_graph(m,n)
+    G = assign_random_numbers(G)
+    G = occupied(G,p)
+
+    H = renormalise(G,m,n)
+    fig, (ax1,ax2) = plt.subplots(1,2)
+    plot(G,ax1,'origional lattice')
+    plot(H,ax2,'renormalised lattice')
+
+
+    height = m+1
+    len_bot_row = (n+1)//2 + 1
+    if n//2==0:
+        len_sec_row = len_bot_row
+    else:
+        len_sec_row = len_bot_row-1
+    edges=[]
+    for y in range(0,height):
+        edges = np.append(edges,(0,y)) #left edge
+
+        #right edge
+        if y//2==0:
+            edges = np.append(edges,(len_bot_row-1,y),)
+        elif y//2 !=0:
+            edges = np.append(edges,(len_sec_row-1,y),)
+     
+    for x in range(0,len_bot_row):
+        edges = np.append(edges,(x,0))#bottom edge
+
+        #top edge
+        if height//2 == 0:
+            edges = np.append(edges,(x,height-1))
+        elif height//2 != 0:
+            if x<len_sec_row-1:
+                edges = np.append(edges,(x,height-1))
+
     
-    occupation_prob = 0
-    for size in sizes:
-        occupation_prob = occupation_prob + size*cluster_size_density[int(size)]
-
-    average_size = 0
-    for size in sizes:
-        average_size = average_size + size*size*cluster_size_density[int(size)]
-
-    average_size = (1/occupation_prob) * average_size
-    return average_size
-    
-probs=np.arange(0.1,1,0.05)
-m=100
-n=100
-runs=5
-S = np.zeros((runs,len(probs)))
-fig = plt.figure()
-ax = plt.axes()
-ax.set_xlabel('P')
-ax.set_ylabel('Average Cluster Size')
-for run in range(0,runs):
-    i=0
-    for p in probs:
-        G = nx.triangular_lattice_graph(m,n)
-        G = assign_random_numbers(G)
-        G = occupied(G,p)
-
-        average_size = average_clust_size(G)
-        S[run,i] = average_size
-        i += 1
-    ax.scatter(probs,S[run,:],marker='.')
-
-ax.plot(probs,np.average(S,axis=0),color='black',label=f'Average over {runs} runs')
-ax.vlines(0.5,np.min(np.average(S,axis=0)),np.max(np.average(S,axis=0)),color='black',linestyle='--',label='P_c')
-ax.legend()
-
-
-p=0.5
-G = nx.triangular_lattice_graph(m,n)
-G = assign_random_numbers(G)
-G = occupied(G,p)
-
-H = renormalise(G,m,n)
-fig, (ax1,ax2) = plt.subplots(1,2)
-plot(G,ax1,'origional lattice')
-plot(H,ax2,'renormalised lattice')
-plt.show()
+    print(edges)
+    plt.show()
