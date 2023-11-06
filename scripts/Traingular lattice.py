@@ -111,7 +111,7 @@ def clsuter_size(G):
         sizes = np.append(sizes,len(clusters[i]))
     return sizes
 
-def average_clust_size(G):
+def average_clust_size(G,m,n):
     num_nodes = G.number_of_nodes()
     positions = np.asarray(G.nodes)
     occs = np.asarray([G.nodes[node]['occupied'] for node in G.nodes])
@@ -152,14 +152,14 @@ if case == 's':
             G = assign_random_numbers(G)
             G = occupied(G,p)
 
-        average_size = average_clust_size(G)
-        S[run,i] = average_size
-        i += 1
-    ax.scatter(probs,S[run,:],marker='.')
+            average_size = average_clust_size(G)
+            S[run,i] = average_size
+            i += 1
+        ax.scatter(probs,S[run,:],marker='.')
 
-ax.plot(probs,np.average(S,axis=0),color='black',label=f'Average over {runs} runs')
-ax.vlines(0.5,np.min(np.average(S,axis=0)),np.max(np.average(S,axis=0)),color='black',linestyle='--',label='P_c')
-ax.legend()
+    ax.plot(probs,np.average(S,axis=0),color='black',label=f'Average over {runs} runs')
+    ax.vlines(0.5,np.min(np.average(S,axis=0)),np.max(np.average(S,axis=0)),color='black',linestyle='--',label='P_c')
+    ax.legend()
 
 if case == 'r':
     p=0.5
