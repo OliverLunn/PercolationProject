@@ -34,9 +34,17 @@ class Percolation2D:
         -------
         """
         
+        lattice = self.rand_lattice(size)
+        lattice = self.occupied(lattice,size,p)
+        return lattice
+    
+    def rand_lattice(self,size):
         rows, columns = size, size
-
         lattice = [[0 for i in range(rows)] for j in range(columns)]
+        return lattice
+    
+    def occupied(self,lattice,size,p):
+        rows, columns = size, size
         for i in range(rows):
             for j in range(columns):
                 lattice[i][j] = uniform(0,1) <= p

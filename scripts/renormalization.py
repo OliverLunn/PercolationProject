@@ -39,6 +39,7 @@ if __name__ == '__main__':
             avg_size1[i,r] = percolation2d.average_cluster_size(lattice_renorm_lab)
 
             i += 1
+            
     ydata = np.average(avg_size,axis=1) / np.max(avg_size)
     #ydata1 is renormalized data 
     #ydata1 = np.average(avg_size1,axis=1) / np.max(avg_size1)
