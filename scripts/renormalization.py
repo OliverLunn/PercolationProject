@@ -6,57 +6,53 @@ import scipy.ndimage as ndimage
 from tqdm import tqdm
 import scipy.optimize as opt
 
-
 from main import Percolation2D
-
-
-def sigmoid(x, x0, a, k1, k2):
-    y_fit = 1 / (1 + a*np.exp(-k1*(x-x0)) + b*np.exp(-k2*(x-x0)))
-    return y_fit
 
 if __name__ == '__main__':
 
     percolation2d = Percolation2D() #create class object
 
-    p1 = 0.59274605079210  #transition prob
-    size, size1 = 80, 40
+    p = 0.59274605079210  #transition prob
+    size = 432
     b = 2 #renormalization scaling value
-    rep = 100
-    probs = np.arange(0.1,0.9,0.005)
+    lattice, labeled_lattice, max_cluster = percolation2d.generate(size, p)
+    #coarse graining
+    coarse_grain_1 = percolation2d.coarse_graining(3, lattice, size)
+    coarse_grain_2 = percolation2d.coarse_graining(3, coarse_grain_1, size/3)
 
-    avg_size = np.zeros((len(probs), rep))
-    avg_size1 = np.zeros((len(probs), rep))
-    renorm_array = []
+    #block spin renorm
+    block_spin_1 = percolation2d.renorm_group(b, size, lattice)
+    block_spin_2 = percolation2d.renorm_group(b, size/b, block_spin_1)
 
-    for r in tqdm(range(0,rep)):
-        i=0
-        for p in probs:
-            lattice = percolation2d.lattice_random(size, p)
-            labeled_lattice = percolation2d.cluster_search(lattice)
-            avg_size[i,r] = percolation2d.average_cluster_size(lattice, size)
-            #lattice_renorm = percolation2d.renorm_group(b, size, lattice)
-            #avg_size1[i,r] = percolation2d.average_cluster_size(lattice_renorm)
+    fig, (ax1,ax2,ax3) = plt.subplots(1,3)
+    fig1, (ax4,ax5,ax6) = plt.subplots(1,3)
 
-            i += 1
-    ydata = np.average(avg_size,axis=1)
-    #ydata1 is renormalized data 
-    #ydata1 = np.average(avg_size1,axis=1) / np.max(avg_size1)
+    ax1.imshow(lattice, cmap="binary")
+    ax2.imshow(coarse_grain_1, cmap="binary")
+    ax3.imshow(coarse_grain_2, cmap="binary")
+    ax4.imshow(lattice, cmap="binary")
+    ax5.imshow(block_spin_1, cmap="binary")
+    ax6.imshow(block_spin_2, cmap="binary")
 
-    #popt, pcov = opt.curve_fit(sigmoid, probs, ydata, method='lm')
-    #popt1, pcov1 = opt.curve_fit(sigmoid, probs, ydata1, method='lm')
-    fig, (ax1) = plt.subplots(1,1)
-
-    ax1.plot(probs, ydata, "ko", label="lattice")
-    #ax1.plot(probs, ydata1, "k<", label="Renormalised lattice")
-    #ax1.plot(probs, probs, "b--", label="$p=p'$")
-    #plt.plot(probs, percolation2d.renorm_group_theory(probs, renorm_array), label="R(p)")
-    #ax1.plot(probs, sigmoid(probs, *popt1), "g", label="lattice fit")
-    #ax1.plot(probs, sigmoid(probs, *popt), "k", label="lattice fit")
-    ax1.vlines(p1,0,1, linestyles='--', color='black', label="$p_c$")
-    ax1.set_ylabel("Average Cluster Size, $\zeta_p$", fontsize="20")
-    ax1.set_xlabel("Probability, $p$", fontsize="20")
-    ax1.tick_params(axis="x", labelsize=18)
-    ax1.tick_params(axis="y", labelsize=18)
-
-    plt.legend()
+    ax1.text(10, 25," N="+str(int(size)), ha='left', va='top', fontsize="20", bbox={'facecolor': 'white', 'pad': 10})
+    ax2.text(3, 3,"N="+str(int(size/3)), fontsize="20", bbox={'facecolor': 'white', 'pad': 10})
+    ax3.text(1, 1, "N="+str(int(size/9)), fontsize="20", bbox={'facecolor': 'white', 'pad': 10})
+    ax4.text(12, size-20, "N="+str(int(size)), fontsize="20", bbox={'facecolor': 'white', 'pad': 10})
+    ax5.text(6, size/2-8, "N="+str(int(size/2)), fontsize="20", bbox={'facecolor': 'white', 'pad': 10})
+    ax6.text(2, size/4-2, "N="+str(int(size/4)), fontsize="20", bbox={'facecolor': 'white', 'pad': 10})
+    
+    ax1.set_xlim(0, size)
+    ax1.set_ylim(0, size)
+    ax2.set_xlim(0, size/3)
+    ax2.set_ylim(0, size/3)
+    ax3.set_xlim(0, size/9)
+    ax3.set_ylim(0, size/9)
+    
+    ax1.axis("off")
+    ax2.axis("off")
+    ax3.axis("off")
+    ax4.axis("off")
+    ax5.axis("off")
+    ax6.axis("off")
+    plt.tight_layout()
     plt.show()

@@ -34,36 +34,9 @@ class Percolation2D:
         -------
         """
         
-        lattice = self.rand_lattice(size)
-        lattice = self.occupied(lattice,size,p)
-        return lattice
-    
-    def rand_lattice(self,size):
-        '''Generates a lattice of shape (size,size) containing indepenednt 
-        pseudorandom numbers
-        
-        INPUTS
-        size - size of lattie [int]
-        OUTPUTS
-        lattice - array of shape (size,size) containing random numbers [ndarray]
-        '''
         rows, columns = size, size
+
         lattice = [[0 for i in range(rows)] for j in range(columns)]
-        return lattice
-    
-    def occupied(self,lattice,size,p):
-        '''
-        Occupies a sites in a random lattice based on a probabilty p
-
-        INPUTS
-        lattice - array of random nubers [ndarray]
-        size - size of lattice [int]
-        p - occupation probabilty [float]
-
-        OUTPUTS
-        lattice - array of occupied (1) and unocciped (-1) sites [ndarray]
-        '''
-        rows, columns = size, size
         for i in range(rows):
             for j in range(columns):
                 lattice[i][j] = uniform(0,1) <= p
@@ -120,7 +93,7 @@ class Percolation2D:
 
         return lattice, labeled_lattice, max_cluster
     
-    def coarse_graining(self, b, lattice):
+    def coarse_graining(self, b, size, lattice):
         """
         This function implements a majority rule coarse graining transformation on a lattice of N x N dimensions.
         Inputs:
@@ -131,13 +104,12 @@ class Percolation2D:
         scaled_lattice : transformed lattice [type : numpy array]
 
         """
-        size = len(lattice[0,:])
-        scaled_lattice = np.zeros((int(size/b),int(size/b)))
+        scaled_lattice = np.zeros((int(size+1/b),int(size+1/b)))
         i_new = 0
 
-        for i in range(1,size,b):
+        for i in range(1,int(size),int(b)):
             j_new = 0
-            for j in range(1,size,b):
+            for j in range(1,int(size),int(b)):
                 lattice1 = lattice[i-1:i+2,j-1:j+2]
                 norm_lattice = np.sign(np.mean(lattice1))
                     
@@ -167,11 +139,11 @@ class Percolation2D:
         """
         scaled_lattice = np.zeros((int(size/b), int(size/b)))
         i_new = 0
-        for i in range(0, size-1, b):
+        for i in range(0, int(size)-1, b):
             j_new = 0
-            for j in range(0, size-1, b):
+            for j in range(0, int(size)-1, b):
                 
-                lattice1 = lattice[i:i+2,j:j+2]
+                lattice1 = lattice[i:i+b,j:j+b]
                 count = sum(lattice1)
 
                 ab = lattice1[0,0:2]
@@ -197,11 +169,11 @@ class Percolation2D:
 
         return scaled_lattice
     
-    def average_cluster_size(self, lattice):
-        m = np.where(lattice==-1, False, True) #convert to boolean
-        lw, num = ndimage.label(m) #label clusters
-        labelList = np.arange(lw.max() + 1) #create list of labels
-        area = ndimage.sum_labels(m, lw, labelList) #find areas of clusters
+    def average_cluster_size(self, lattice, size):
+        m = np.where(lattice==-1, False, True)
+        lw, num = ndimage.label(m)
+        labelList = np.arange(lw.max() + 1)
+        area = ndimage.sum_labels(m, lw, labelList)
         # Remove spanning cluster by setting its area to zero
         perc_x = np.intersect1d(lw[0,:],lw[-1,:])
         perc = perc_x[np.where(perc_x>0)]
