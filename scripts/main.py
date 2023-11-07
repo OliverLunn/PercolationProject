@@ -34,16 +34,23 @@ class Percolation2D:
         -------
         """
         
+        lattice = self.rand_lattice(size)
+        lattice = self.occupied(lattice,size,p)
+        return lattice
+
+    def rand_lattice(self,size):
         rows, columns = size, size
 
         lattice = [[0 for i in range(rows)] for j in range(columns)]
+        return lattice
+    def occupied(self,lattice,size,p):
+        rows, columns = size, size
         for i in range(rows):
             for j in range(columns):
                 lattice[i][j] = uniform(0,1) <= p
         lattice = np.array(lattice) 
         lattice = np.where(lattice==0, -1, 1)
         return lattice
-
     def cluster_search(self, lattice):
         """
         Searches lattice array of occupied sites for clusters.
@@ -169,7 +176,7 @@ class Percolation2D:
 
         return scaled_lattice
     
-    def average_cluster_size(self, lattice, size):
+    def average_cluster_size(self, lattice):
         m = np.where(lattice==-1, False, True)
         lw, num = ndimage.label(m)
         labelList = np.arange(lw.max() + 1)

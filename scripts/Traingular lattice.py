@@ -208,7 +208,7 @@ if case == 's':
         fit.set_label(f'gamma is estimated as {ppot[0]:.4f} ± {err[0]:.4f}')
         fit2.set_data(probs,f2(probs,-ppot[0]))
         ax2.legend()
-        plt.plot()
+        plt.show()
 
     
     ax2.set_xlabel('$log(|P-P_c|)$')
@@ -244,6 +244,20 @@ if case == 's':
     
     fit2, = ax1.plot(probs,f2(probs,-ppot[0]),color='red',label='fit')
     ax1.set_ylim(np.min(np.average(S,axis=0)),np.max(np.average(S,axis=0)))
+    plt.show()
+    fig2, (ax3)=plt.subplots(1)
+
+    ax3.plot(probs,P[:])
+
+    ipc = np.argmax(P[:]>0.5) # Find first value where Perc_prob>0.5
+    # Interpolate from ipc-1 to ipc to find intersection
+    ppc = probs[ipc-1] + (0.5-P[ipc-1])*\
+    (probs[ipc]-probs[ipc-1])/(P[ipc]-P[ipc-1])
+
+    ax3.scatter(ppc,0.5)
+    print(pcp)
+    plt.show()
+    
     
 
 

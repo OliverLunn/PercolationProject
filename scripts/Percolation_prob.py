@@ -25,5 +25,24 @@ for size in sizes:
     
     perc_prob[j,:] = perc_prob[j,:]/runs
     j+=1
-np.savetxt('scripts\\percolation probabilty.txt',perc_prob)
+#np.savetxt('scripts\\percolation probabilty.txt',perc_prob)
 
+fig,(ax1) = plt.subplots(1,1)
+colors=['red','orange','yellow','green','blue','purple']
+pcs = np.zeros(len(sizes))
+for j in range(0,len(sizes)):
+    ax1.plot(probs,perc_prob[j,:],label = f'L={int(sizes[j])}',color=colors[j])
+
+    ipc = np.argmax(perc_prob[j,:]>0.5) # Find first value where Perc_prob>0.5
+    # Interpolate from ipc-1 to ipc to find intersection
+    ppc = probs[ipc-1] + (0.5-perc_prob[j,ipc-1])*\
+        (probs[ipc]-probs[ipc-1])/(perc_prob[j,ipc]-perc_prob[j,ipc-1])
+    pcs[j]=ppc
+    ax1.scatter(ppc,0.5)
+ax1.set_xlabel('$p$')
+ax1.set_ylabel('$\Pi(p,L)$')
+
+pc=np.average(pcs)
+err=np.std(pcs)
+print(f'P-c is approximated as {pc:.5} +/- {err:.1}')
+plt.show()
