@@ -38,9 +38,10 @@ for j in range(0,len(sizes)):
     ppc = probs[ipc-1] + (0.5-perc_prob[j,ipc-1])*\
         (probs[ipc]-probs[ipc-1])/(perc_prob[j,ipc]-perc_prob[j,ipc-1])
     pcs[j]=ppc
-    ax1.scatter(ppc,0.5)
+    ax1.scatter(ppc,0.5,color = 'black')
 ax1.set_xlabel('$p$')
 ax1.set_ylabel('$\Pi(p,L)$')
+ax1.legend()
 
 pc=np.average(pcs)
 err=np.std(pcs)
