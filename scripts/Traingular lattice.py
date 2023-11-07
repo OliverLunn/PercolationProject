@@ -116,7 +116,7 @@ def clsuter_size(G):
         sizes = np.append(sizes,len(clusters[i]))
     return sizes
 
-def average_clust_size_Percolation_prob(G,m,n):
+def average_clust_size(G,m,n):
     num_nodes = G.number_of_nodes()
     positions = np.asarray(G.nodes)
     occs = np.asarray([G.nodes[node]['occupied'] for node in G.nodes])
@@ -146,11 +146,9 @@ def average_clust_size_Percolation_prob(G,m,n):
     
     if (len(perc)>0):
         area[int(perc[0])] = 0
-        P = 1
-    else:
-        P = 0
+
     S = (sum(area*area))/num_nodes
-    return S,P
+    return S
         
 
 
@@ -158,7 +156,7 @@ def average_clust_size_Percolation_prob(G,m,n):
 
 #========================================START OF CODE============================================
 
-case = 's'
+case = 'p'
 if case == 's':
     probs=np.arange(0.1,0.7,0.005)
     m=125
@@ -173,7 +171,7 @@ if case == 's':
         for p in tqdm(probs):
             G = occupied(G,p)
 
-            S[run,i],P[run,i]= average_clust_size_Percolation_prob(G,m,n)
+            S[run,i]= average_clust_size(G,m,n)
             i += 1
 
     #plot cluster size
@@ -241,23 +239,34 @@ if case == 's':
     ax2.legend()
     def f2(x,gamma):
         return (np.abs(x-0.5))**(-gamma)
-    
-    fit2, = ax1.plot(probs,f2(probs,-ppot[0]),color='red',label='fit')
-    ax1.set_ylim(np.min(np.average(S,axis=0)),np.max(np.average(S,axis=0)))
     plt.show()
-    fig2, (ax3)=plt.subplots(1)
 
-    ax3.plot(probs,P[:])
-
-    ipc = np.argmax(P[:]>0.5) # Find first value where Perc_prob>0.5
-    # Interpolate from ipc-1 to ipc to find intersection
-    ppc = probs[ipc-1] + (0.5-P[ipc-1])*\
-    (probs[ipc]-probs[ipc-1])/(P[ipc]-P[ipc-1])
-
-    ax3.scatter(ppc,0.5)
-    print(pcp)
-    plt.show()
+if case == 'p':
+    probs=np.arange(0.1,0.7,0.005)
+    sizes=[100,150,200,250]
     
+    P = np.zeros((len(sizes),len(probs)))
+    j=0
+    for size in tqdm(sizes):
+        m=size//2
+        n=size
+        runs=2
+        runs = 10
+        for run in tqdm(range(0,runs)):
+            i=0
+            G = nx.triangular_lattice_graph(m,n)
+            G = assign_random_numbers(G)
+            for p in (probs):
+                G = occupied(G,p)
+
+                P[j,i]= P[j,i] + average_clust_size(G,m,n)
+                i += 1
+        P[j,:] = P[j,:]/runs
+        j+=1
+fig ,(ax1) = plt.subplots(1)
+for j in range(len(sizes)):
+    ax1.plot(probs,P[j,:])
+plt.show
     
 
 
