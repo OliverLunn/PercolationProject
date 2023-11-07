@@ -78,42 +78,33 @@ if __name__ == '__main__':
 
     fig, (ax1) = plt.subplots(1,1)
 
-    fig1, (ax2,ax3) = plt.subplots(1,2)
-    fig2, (ax4, ax5) = plt.subplots(1,2)
-
+    fig1, (ax4,ax3) = plt.subplots(1,2)
+    
     ax1.imshow(ages_start / np.max(ages_start), cmap="jet")
     ax1.set_xticks([])
     ax1.set_xlabel('Species')
     ax1.set_ylabel('Generations')
     ax1.set_aspect("equal")
 
-    ax2.plot(range(len(x)), x)
-    ax2.set_xlabel("survival time")
-    ax2.set_ylabel("fitness barrier, B(x)")
-    ax2.set_xscale("log")
-    ax2.set_yscale("log")
-
     ax3.plot(B, "k.")
     ax3.hlines(2/3, 0, npoints)
     ax3.set_xlim(0,npoints+1)
     ax3.set_ylim(0,1.1)
-    ax3.set_xlabel("points")
-    ax3.set_ylabel("fitness barrier, B(x)")
+    ax3.set_xlabel("Points", fontsize="20")
+    ax3.set_ylabel("B(x)", fontsize="20")
 
     ax4.hist(data_b, bins=30, density=True, histtype="step", color="k")
-    ax5.hist(min_b_a, bins=30, density=True, histtype="step", color="k")
+    ax4.hist(min_b_a, bins=30, density=True, histtype="step", color="b")
 
     ax4.set_ylabel("P(B)", fontsize="20")
-    ax4.set_xlabel("B", fontsize="20")
-    ax5.set_ylabel("P(B)", fontsize="20")
-    ax5.set_xlabel("B", fontsize="20")
-
+    ax4.set_xlabel("B(x)", fontsize="20")
     ax4.set_xlim(0,1)
-    #ax4.set_ylim(0,4)
-    ax5.set_xlim(0,1)
-    #ax5.set_ylim(0,3.5)
-    
-    ax4.vlines(0.66, 0, 4, "r", linestyle="dashed")
-    ax5.vlines(0.66, 0, 3.5, "r", linestyle="dashed")
 
+    ax3.tick_params(axis="x", labelsize=20)
+    ax3.tick_params(axis="y", labelsize=20)
+    ax4.tick_params(axis="x", labelsize=20)
+    ax4.tick_params(axis="y", labelsize=20)
+
+    ax4.vlines(0.66, 0, 4, "r", linestyle="dashed", label="$p_c$")
+    ax4.legend(fontsize="20")
     plt.show()
