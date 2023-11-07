@@ -17,8 +17,8 @@ if __name__ == '__main__':
     b = 2 #renormalization scaling value
     lattice, labeled_lattice, max_cluster = percolation2d.generate(size, p)
     #coarse graining
-    coarse_grain_1 = percolation2d.coarse_graining(3, lattice, size)
-    coarse_grain_2 = percolation2d.coarse_graining(3, coarse_grain_1, size/3)
+    coarse_grain_1 = percolation2d.coarse_graining(3, size,lattice)
+    coarse_grain_2 = percolation2d.coarse_graining(3, size/3, coarse_grain_1)
 
     #block spin renorm
     block_spin_1 = percolation2d.renorm_group(b, size, lattice)
