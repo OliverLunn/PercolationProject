@@ -26,7 +26,7 @@ plt.figure()
 ax = plt.axes()
 p_c = 0.59274605079210
 ax.plot(np.log(np.abs(probs-p_c)),np.log(np.average(avg_size,axis=0)))
-np.savetxt(f'{size}x{size} lattice average size data over {runs} runs.txt',avg_size)
+#np.savetxt(f'{size}x{size} lattice average size data over {runs} runs.txt',avg_size)
 
 
 
