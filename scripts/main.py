@@ -210,7 +210,17 @@ class Percolation2D:
         S = sum(area*area)
         
         return S
-    
+    def percolation_probability(self,lattice):
+        m = np.where(lattice==-1, False, True)
+        lw, num = ndimage.label(m)
+        #check if lattice percolates
+        perc_x = np.intersect1d(lw[0,:],lw[-1,:])
+        perc = perc_x[np.where(perc_x>0)]
+        if (len(perc)>0):
+            P = 1
+        else:
+            P=0
+        return P
     def renorm_group_theory(self, probs, array):
         """
         Renormalization group predicition for the 2x2 blocking regime

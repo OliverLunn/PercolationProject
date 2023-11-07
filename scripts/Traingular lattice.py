@@ -5,6 +5,7 @@ import scipy.spatial as spatial
 from scipy import ndimage
 import scipy.optimize as opt
 from tqdm import tqdm
+import matplotlib.widgets as widgets
 
 def assign_random_numbers(G):
     for node in G.nodes:
@@ -115,7 +116,7 @@ def clsuter_size(G):
         sizes = np.append(sizes,len(clusters[i]))
     return sizes
 
-def average_clust_size(G,m,n):
+def average_clust_size_Percolation_prob(G,m,n):
     num_nodes = G.number_of_nodes()
     positions = np.asarray(G.nodes)
     occs = np.asarray([G.nodes[node]['occupied'] for node in G.nodes])
@@ -145,29 +146,40 @@ def average_clust_size(G,m,n):
     
     if (len(perc)>0):
         area[int(perc[0])] = 0
+        P = 1
+    else:
+        P = 0
     S = (sum(area*area))/num_nodes
-    return S
+    return S,P
         
+
+
+
+
+#========================================START OF CODE============================================
 
 case = 's'
 if case == 's':
     probs=np.arange(0.1,0.7,0.005)
-    m=100
-    n=100
+    m=125
+    n=250
     runs=25
     S = np.zeros((runs,len(probs)))
-
+    P = np.zeros((runs,len(probs)))
     for run in tqdm(range(0,runs)):
         i=0
         G = nx.triangular_lattice_graph(m,n)
         G = assign_random_numbers(G)
-        for p in probs:
+        for p in tqdm(probs):
             G = occupied(G,p)
 
-            S[run,i]  = average_clust_size(G,m,n)
+            S[run,i],P[run,i]= average_clust_size_Percolation_prob(G,m,n)
             i += 1
 
-    fig, (ax1,ax2)= plt.subplots(1,2)
+    #plot cluster size
+    fig= plt.figure
+    ax1=plt.axes([0.05,0.15,0.45,0.8])
+    ax2=plt.axes([0.55,0.15,0.45,0.8])
     
     ax1.set_xlabel('$P$')
     ax1.set_ylabel('$S(p,L)$')
@@ -175,6 +187,30 @@ if case == 's':
     ax1.vlines(0.5,np.min(np.average(S,axis=0)),np.max(np.average(S,axis=0)),color='black',linestyle='--',label='P_c')
     ax1.legend()
 
+    def slider_callback(val):
+        #find the min and max values of the slider
+        xmin=val[0]
+        xmax=val[1]
+        
+        #set the lines to be at the positions of the xmin and xmax values
+        line_min.set_xdata([xmin])
+        line_max.set_xdata([xmax])
+        
+        #find the indexes where the xdata is within th elimits of the slider
+        indexes = np.where((xdata>xmin) & (xdata<xmax))
+        
+        #calculate the new fit on only the data in this range 
+        ppot,pcov = opt.curve_fit(func,xdata[indexes],ydata[indexes])
+        err = np.sqrt(np.diag(pcov))
+        #set the data for the fit to be the new data
+        fit.set_data(xdata,func(xdata,*ppot))
+        #update the label and the legend
+        fit.set_label(f'gamma is estimated as {ppot[0]:.4f} ± {err[0]:.4f}')
+        fit2.set_data(probs,f2(probs,-ppot[0]))
+        ax2.legend()
+        plt.plot()
+
+    
     ax2.set_xlabel('$log(|P-P_c|)$')
     ax2.set_ylabel('$log(S(p.L))$')
 
@@ -189,10 +225,27 @@ if case == 's':
         xdata = np.append(xdata,np.log(np.abs(probs[i]-p_c)))
         ydata = np.append(ydata,np.log(np.average(S[:,i],axis=0)))
 
+    line_min = ax2.axvline(np.min(xdata),np.min(ydata),np.max(ydata),color='black',linestyle='--',label='P_c')
+    line_max = ax2.axvline(np.max(xdata),np.min(ydata),np.max(ydata),color='black',linestyle='--',label='P_c')
+
     ppot,pcov = opt.curve_fit(func,xdata,ydata)
+    err = np.sqrt(np.diag(pcov))
     ax2.plot(xdata,ydata,color='blue')
-    ax2.plot(xdata,func(xdata,*ppot),color='black')
-    print(ppot)
+    fit, = ax2.plot(xdata,func(xdata,*ppot),color='black')
+    fit.set_label(f'gamma is estimated as {ppot[0]:.4} +/- {err[0]:.4}')
+
+    sax = plt.axes([0.2,0.02,0.6,0.05])
+    slider = widgets.RangeSlider(sax, 'Data Range', np.min(xdata), np.max(xdata),(np.min(xdata),np.max(xdata)))
+    #the cllback allows the slider to control the data range that will the fit is calculated from
+    slider.on_changed(slider_callback)
+    ax2.legend()
+    def f2(x,gamma):
+        return (np.abs(x-0.5))**(-gamma)
+    
+    fit2, = ax1.plot(probs,f2(probs,-ppot[0]),color='red',label='fit')
+    ax1.set_ylim(np.min(np.average(S,axis=0)),np.max(np.average(S,axis=0)))
+    
+
 
 if case == 'r':
     p=0.5
@@ -206,6 +259,5 @@ if case == 'r':
     fig, (ax1,ax2) = plt.subplots(1,2)
     plot(G,ax1,'origional lattice')
     plot(H,ax2,'renormalised lattice')
-
 
 plt.show()
