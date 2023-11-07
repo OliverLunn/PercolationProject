@@ -93,7 +93,7 @@ class Percolation2D:
 
         return lattice, labeled_lattice, max_cluster
     
-    def coarse_graining(self, b, lattice, size):
+    def coarse_graining(self, b, size, lattice):
         """
         This function implements a majority rule coarse graining transformation on a lattice of N x N dimensions.
         Inputs:
