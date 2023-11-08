@@ -192,7 +192,7 @@ def f2(x,gamma):
     return (np.abs(x-0.5))**(-gamma)
 #========================================START OF CODE============================================
 
-case = 'd'
+case = 'p'
 
 if case == 'p':
 
@@ -238,6 +238,7 @@ if case == 'p':
     err=np.std(pcs)
     print(f'P-c is approximated as {pc:.5} +/- {err:.1}')
     plt.show()
+    np.savetxt('data\Triangular lattice percolation prob.txt',P)
 
 
 if case == 's':
@@ -372,21 +373,21 @@ if case == 'd':
             
             j+=1
         i+=1
-mass = np.average(mass,axis=0)
+    mass = np.average(mass,axis=0)
 
-fig,ax1 = plt.subplots(1)
-ax1.scatter(np.log(sizes),np.log(mass),color='black', marker='x')
-def f(x,m,c):
-    return m*x + c
-ppot,pcov = opt.curve_fit(f,np.log(sizes),np.log(mass))
-err = np.sqrt(np.diag(pcov))
-print(ppot[0],err[0])
+    fig,ax1 = plt.subplots(1)
+    ax1.scatter(np.log(sizes),np.log(mass),color='black', marker='x')
+    def f(x,m,c):
+        return m*x + c
+    ppot,pcov = opt.curve_fit(f,np.log(sizes),np.log(mass))
+    err = np.sqrt(np.diag(pcov))
+    print(ppot[0],err[0])
 
-ax1.plot(np.log(sizes),f(np.log(sizes),*ppot),color='black', marker='')
+    ax1.plot(np.log(sizes),f(np.log(sizes),*ppot),color='black', marker='')
 
-ax1.set_xlabel('log(L)', fontsize="22")
-ax1.set_ylabel('log(M(L))', fontsize="22")
+    ax1.set_xlabel('log(L)', fontsize="22")
+    ax1.set_ylabel('log(M(L))', fontsize="22")
 
-ax1.tick_params(axis="x", labelsize=18)
-ax1.tick_params(axis="y", labelsize=18)
-plt.show()
+    ax1.tick_params(axis="x", labelsize=18)
+    ax1.tick_params(axis="y", labelsize=18)
+    plt.show()

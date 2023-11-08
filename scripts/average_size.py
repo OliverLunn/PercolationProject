@@ -9,7 +9,7 @@ def func(x,m,c):
     return m*x + c
 
 percolation2D = Percolation2D()
-sizes = [50,75,100,250,200,250]
+sizes = [50,75,100,150,200,250]
 probs=np.linspace(0.3,0.7,100)
 S = np.zeros((len(sizes),len(probs)))
 j=0

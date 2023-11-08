@@ -8,7 +8,7 @@ from main import Percolation2D
 percolation2D = Percolation2D()
 
 sizes = [50,75,100,150,200,250]
-probs=np.linspace(0.4,0.75,50)
+probs=np.linspace(0.4,0.75,100)
 
 perc_prob = np.zeros((len(sizes),len(probs)))
 
@@ -25,7 +25,7 @@ for size in sizes:
     
     perc_prob[j,:] = perc_prob[j,:]/runs
     j+=1
-#np.savetxt('scripts\\percolation probabilty.txt',perc_prob)
+np.savetxt('data\percolation probabilty.txt',perc_prob)
 
 fig,(ax1) = plt.subplots(1,1)
 colors=['red','orange','yellow','green','blue','purple']
