@@ -34,5 +34,5 @@ if __name__ == '__main__':
     ax1.tick_params(axis="y", labelsize=20)
     ax2.tick_params(axis="y", labelsize=20)
     ax1.legend(fontsize="20")
-    plt.tight_layout()
+
     plt.show()
