@@ -13,6 +13,7 @@ if __name__ == '__main__':
     percolation2d = Percolation2D() #create class object
 
     p = 0.59274605079210  #transition prob
+    p = 0.525
     size = 432
     b = 2 #renormalization scaling value
     lattice, labeled_lattice, max_cluster = percolation2d.generate(size, p)
