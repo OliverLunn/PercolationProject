@@ -9,28 +9,41 @@ def func(x,m,c):
     return m*x + c
 
 percolation2D = Percolation2D()
-size = 100
-probs=np.arange(0.4,0.58,0.001)
-runs=50
-avg_size = np.zeros((runs,len(probs)))
-for r in tqdm(range(0,runs)):
-    i=0
-    lattice = percolation2D.rand_lattice(size)
-    for p in probs:
-        lattice_occupied= percolation2D.occupied(lattice,size,p)
-        avg_size[r,i] = percolation2D.average_cluster_size(lattice_occupied)
-        i+=1
+sizes = [50,75,100,250,200,250]
+probs=np.linspace(0.3,0.7,100)
+S = np.zeros((len(sizes),len(probs)))
+j=0
+for size in tqdm(sizes):
+    runs=int(500*25/size)
+    for r in tqdm(range(0,runs)):
+        i=0
+        lattice = percolation2D.rand_lattice(size)
+        for p in probs:
+            lattice_occupied= percolation2D.occupied(lattice,size,p)
+            S[j,i] =S[j,i] + percolation2D.average_cluster_size(lattice_occupied)
+            i+=1
+    S[j,:] = S[j,:]/((size**2)*runs)
+    j+=1
 
-avg_size = avg_size/(size**2)
-plt.figure()
-ax = plt.axes()
+fig,(ax1)=plt.subplots(1)
+gammas = np.zeros(len(S))
+errs = np.zeros(len(S))
 p_c = 0.59274605079210
-ax.plot(np.log(np.abs(probs-p_c)),np.log(np.average(avg_size,axis=0)))
-#np.savetxt(f'{size}x{size} lattice average size data over {runs} runs.txt',avg_size)
+indx = np.max(np.where(probs<p_c))
+colors=['red','orange','yellow','green','blue','purple']
+for j in range(len(sizes)):
+    
+    ax1.plot(probs,S[j,:],color = colors[j],label=f'L={int(sizes[j])}')
 
-
-
-ppot,pcov = opt.curve_fit(func,np.log(np.abs(probs-p_c)),np.log(np.average(avg_size,axis=0)))
-ax.plot(np.log(np.abs(probs-p_c)),func(np.log(np.abs(probs-p_c)),*ppot),color='black',label='fit')
-print(ppot)
+    ppot,pcov = opt.curve_fit(func,np.log(np.abs(probs[0:indx]-p_c)),np.log(S[j,0:indx]))
+    errs[j] = np.sqrt(np.diag(pcov))[0]
+    gammas[j] = ppot[0]
+np.savetxt(f'data\square lattice average size data.txt',S)
+np.savetxt('data\gamma estimation square.txt',np.vstack((sizes,gammas,errs)))
+ax1.vlines(p_c,np.min(S[j,:]),np.max(S[j,:]),color='black',linestyle='--',label='P_c')
+ax1.legend(fontsize="18")
+ax1.tick_params(axis="x", labelsize=18)
+ax1.tick_params(axis="y", labelsize=18)
+ax1.set_xlabel('$P$',fontsize="22")
+ax1.set_ylabel('$S(p,L)$',fontsize="22")
 plt.show()

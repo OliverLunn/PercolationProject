@@ -116,7 +116,7 @@ def clsuter_size(G):
         sizes = np.append(sizes,len(clusters[i]))
     return sizes
 
-def average_clust_size_Percolation_prob(G,m,n):
+def average_clust_size(G,m,n):
     num_nodes = G.number_of_nodes()
     positions = np.asarray(G.nodes)
     occs = np.asarray([G.nodes[node]['occupied'] for node in G.nodes])
@@ -146,111 +146,150 @@ def average_clust_size_Percolation_prob(G,m,n):
     
     if (len(perc)>0):
         area[int(perc[0])] = 0
-        P = 1
-    else:
-        P = 0
+
     S = (sum(area*area))/num_nodes
-    return S,P
-        
+    return S
 
+def percolation_prob(G,m,n):
+    positions = np.asarray(G.nodes)
+    occs = np.asarray([G.nodes[node]['occupied'] for node in G.nodes])
+    xs = positions[:,0]
+    ys = positions[:,1]
+    height = m+1
+    len_bot_row = (n+1)//2 + 1
+    len_sec_row = np.count_nonzero(ys==1)
 
+    lattice = np.zeros((height,len_bot_row))
+    for i in range(0,len(occs)):
+        lattice[ys[i],xs[i]] = occs[i]
 
+    labeled_lattice = np.zeros((height,len_bot_row))
+    clusters = np.asarray(find_clusters(G))
+    for i in range(0,len(clusters)):
+        cluster = list(clusters[i])
+        for j in range(0,len(cluster)):
+            x = cluster[j][0]
+            y = cluster[j][1]
+            labeled_lattice[y,x] = i+1
 
+    labelList = np.arange(labeled_lattice.max() + 1) #create list of labels
+    area = ndimage.sum_labels(lattice, labeled_lattice, labelList)
+    # Remove spanning cluster by setting its area to zero
+    perc_x = np.intersect1d(labeled_lattice[0,:],labeled_lattice[-1,:])
+    perc = perc_x[np.where(perc_x>0)]
+    
+    if (len(perc)>0):
+        P=1
+    else:
+        P=0
+    
+    return P
+
+def func(x,m,c):
+    return m*x + c
+
+def f2(x,gamma):
+    return (np.abs(x-0.5))**(-gamma)
 #========================================START OF CODE============================================
 
-case = 's'
-if case == 's':
-    probs=np.arange(0.1,0.7,0.005)
-    m=125
-    n=250
-    runs=25
-    S = np.zeros((runs,len(probs)))
-    P = np.zeros((runs,len(probs)))
-    for run in tqdm(range(0,runs)):
-        i=0
-        G = nx.triangular_lattice_graph(m,n)
-        G = assign_random_numbers(G)
-        for p in tqdm(probs):
-            G = occupied(G,p)
+case = 'd'
 
-            S[run,i],P[run,i]= average_clust_size_Percolation_prob(G,m,n)
-            i += 1
+if case == 'p':
 
-    #plot cluster size
-    fig= plt.figure
-    ax1=plt.axes([0.05,0.15,0.45,0.8])
-    ax2=plt.axes([0.55,0.15,0.45,0.8])
+    probs=np.linspace(0.3,0.7,100)
+    sizes = [75,100,150,200,250,300]
     
-    ax1.set_xlabel('$P$')
-    ax1.set_ylabel('$S(p,L)$')
-    ax1.plot(probs,np.average(S,axis=0),color='black',label=f'Average over {runs} runs')
-    ax1.vlines(0.5,np.min(np.average(S,axis=0)),np.max(np.average(S,axis=0)),color='black',linestyle='--',label='P_c')
+    P = np.zeros((len(sizes),len(probs)))
+    j=0
+    for size in tqdm(sizes):
+        m=size//2
+        n=size
+        runs=2
+        runs = int(1000*25/size)
+        for run in tqdm(range(0,runs)):
+            i=0
+            G = nx.triangular_lattice_graph(m,n)
+            G = assign_random_numbers(G)
+            for p in (probs):
+                G = occupied(G,p)
+
+                P[j,i]= P[j,i] + percolation_prob(G,m,n)
+                i += 1
+        P[j,:] = P[j,:]/runs
+        j+=1
+
+    fig ,(ax1) = plt.subplots(1)
+    colors=['red','orange','yellow','green','blue','purple']
+    pcs = np.zeros(len(sizes))
+    for j in range(0,len(sizes)):
+        ax1.plot(probs,P[j,:],label = f'L={int(sizes[j])}',color=colors[j])
+
+        ipc = np.argmax(P[j,:]>0.5) # Find first value where Perc_prob>0.5
+        # Interpolate from ipc-1 to ipc to find intersection
+        ppc = probs[ipc-1] + (0.5-P[j,ipc-1])*\
+            (probs[ipc]-probs[ipc-1])/(P[j,ipc]-P[j,ipc-1])
+        pcs[j]=ppc
+        ax1.scatter(ppc,0.5,color='black')
+    ax1.set_xlabel('$p$')
+    ax1.set_ylabel('$\Pi(p,L)$')
     ax1.legend()
 
-    def slider_callback(val):
-        #find the min and max values of the slider
-        xmin=val[0]
-        xmax=val[1]
+    pc=np.average(pcs)
+    err=np.std(pcs)
+    print(f'P-c is approximated as {pc:.5} +/- {err:.1}')
+    plt.show()
+
+
+if case == 's':
+    probs=np.linspace(0.3,0.7,100)
+    sizes = [50,75,100,150,200,250]
+    
+    S = np.zeros((len(sizes),len(probs)))
+    j=0
+    for size in tqdm(sizes):
+        m=size//2
+        n=size
+        runs = int(500*25/size)
+        for run in tqdm(range(0,runs)):
+            i=0
+            G = nx.triangular_lattice_graph(m,n)
+            G = assign_random_numbers(G)
+            for p in (probs):
+                G = occupied(G,p)
+
+                S[j,i]= S[j,i] + average_clust_size(G,m,n)
+                i += 1
+        S[j,:] = S[j,:]/runs
+        j+=1
+    fig,(ax1) = plt.subplots(1)
+
+    colors=['red','orange','yellow','green','blue','purple']
+    gammas = np.zeros(len(sizes))
+    errs = np.zeros(len(sizes))
+    p_c =0.5
+    indx = np.max(np.where(probs<p_c))
+    for j in range(len(sizes)):
+        ax1.plot(probs,S[j,:],color = colors[j],label=f'L={int(sizes[j])}')
         
-        #set the lines to be at the positions of the xmin and xmax values
-        line_min.set_xdata([xmin])
-        line_max.set_xdata([xmax])
-        
-        #find the indexes where the xdata is within th elimits of the slider
-        indexes = np.where((xdata>xmin) & (xdata<xmax))
-        
-        #calculate the new fit on only the data in this range 
-        ppot,pcov = opt.curve_fit(func,xdata[indexes],ydata[indexes])
-        err = np.sqrt(np.diag(pcov))
-        #set the data for the fit to be the new data
-        fit.set_data(xdata,func(xdata,*ppot))
-        #update the label and the legend
-        fit.set_label(f'gamma is estimated as {ppot[0]:.4f} ± {err[0]:.4f}')
-        fit2.set_data(probs,f2(probs,-ppot[0]))
-        ax2.legend()
-        plt.plot()
-
+        ppot,pcov = opt.curve_fit(func,np.log(np.abs(probs[0:indx]-p_c)),np.log(S[j,0:indx]))
+        errs[j] = np.sqrt(np.diag(pcov))[0]
+        gammas[j] = ppot[0]
     
-    ax2.set_xlabel('$log(|P-P_c|)$')
-    ax2.set_ylabel('$log(S(p.L))$')
+    ax1.vlines(0.5,np.min(S[j,:]),np.max(S[j,:]),color='black',linestyle='--',label='P_c')
+    ax1.legend()
+    ax1.set_xlabel('$P$')
+    ax1.set_ylabel('$S(p,L)$')
+    plt.show()
+    print(gammas,errs)
+    print(np.average(gammas),np.average(errs))
 
-    def func(x,m,c):
-        return m*x + c
-    
-    indx = np.where(probs<0.5)
-    p_c = 0.5
-    xdata = []
-    ydata = []
-    for i in indx:
-        xdata = np.append(xdata,np.log(np.abs(probs[i]-p_c)))
-        ydata = np.append(ydata,np.log(np.average(S[:,i],axis=0)))
-
-    line_min = ax2.axvline(np.min(xdata),np.min(ydata),np.max(ydata),color='black',linestyle='--',label='P_c')
-    line_max = ax2.axvline(np.max(xdata),np.min(ydata),np.max(ydata),color='black',linestyle='--',label='P_c')
-
-    ppot,pcov = opt.curve_fit(func,xdata,ydata)
-    err = np.sqrt(np.diag(pcov))
-    ax2.plot(xdata,ydata,color='blue')
-    fit, = ax2.plot(xdata,func(xdata,*ppot),color='black')
-    fit.set_label(f'gamma is estimated as {ppot[0]:.4} +/- {err[0]:.4}')
-
-    sax = plt.axes([0.2,0.02,0.6,0.05])
-    slider = widgets.RangeSlider(sax, 'Data Range', np.min(xdata), np.max(xdata),(np.min(xdata),np.max(xdata)))
-    #the cllback allows the slider to control the data range that will the fit is calculated from
-    slider.on_changed(slider_callback)
-    ax2.legend()
-    def f2(x,gamma):
-        return (np.abs(x-0.5))**(-gamma)
-    
-    fit2, = ax1.plot(probs,f2(probs,-ppot[0]),color='red',label='fit')
-    ax1.set_ylim(np.min(np.average(S,axis=0)),np.max(np.average(S,axis=0)))
-    
-
+    np.savetxt('data\Triangular lattice average size.txt',S)
+    np.savetxt('data\gamma estimation.txt',np.vstack((sizes,gammas,errs)))
 
 if case == 'r':
     p=0.5
     m=12
-    n=12
+    n=7
     G = nx.triangular_lattice_graph(m,n)
     G = assign_random_numbers(G)
     G = occupied(G,p)
@@ -260,4 +299,94 @@ if case == 'r':
     plot(G,ax1,'origional lattice')
     plot(H,ax2,'renormalised lattice')
 
+plt.show()
+def convert_lattice(G,m,n):
+    positions = np.asarray(G.nodes)
+    occs = np.asarray([G.nodes[node]['occupied'] for node in G.nodes])
+    xs = positions[:,0]
+    ys = positions[:,1]
+    height = m+1
+    len_bot_row = (n+1)//2 + 1
+
+    lattice = np.zeros((height,len_bot_row))
+    for i in range(0,len(occs)):
+        lattice[ys[i],xs[i]] = occs[i]
+        
+    return lattice
+
+def label_lattice(G,m,n):
+    height = m+1
+    len_bot_row = (n+1)//2 + 1
+    
+    labeled_lattice = np.zeros((height,len_bot_row))
+    clusters = np.asarray(find_clusters(G))
+    for i in range(0,len(clusters)):
+        cluster = list(clusters[i])
+        for j in range(0,len(cluster)):
+            x = cluster[j][0]
+            y = cluster[j][1]
+            labeled_lattice[y,x] = int(i+1)
+    return labeled_lattice
+
+def find_max_cluster(labeled_lattice):
+    count = []
+    for label in range(1,int(np.max(labeled_lattice)+1)):
+        count =np.append(count,len(np.where(labeled_lattice==label)[0]))
+    max_cluster = np.where(labeled_lattice == np.argmax(count)+1,1,0)
+    return max_cluster
+if case == 'd':
+    sizes = [50,100,150,200,250]
+    runs = 50
+    p=0.5
+    mass = np.zeros((runs,len(sizes)))
+    massH = np.zeros((runs,len(sizes)))
+    i=0
+    for size in tqdm(sizes):
+        j=0
+        for run in range(runs):
+            span = False
+            m=size//2
+            n=size
+            span = False
+            while span == False:
+                G = nx.triangular_lattice_graph(m,n)
+                G = assign_random_numbers(G)
+                G = occupied(G,p)
+
+                #convert G to array
+                lattice = convert_lattice(G,m,n)
+                
+                #label the lattice
+                labeled_lattice = label_lattice(G,m,n)
+                
+                #find max cluster
+                max_cluster = find_max_cluster(labeled_lattice)
+                
+                #check if max cluster percolates
+                perc_x = np.intersect1d(max_cluster[0,:],max_cluster[-1,:])
+                perc = perc_x[np.where(perc_x>0)]
+            
+                if (len(perc)>0):
+                       break
+            mass[j,i] = np.count_nonzero(max_cluster)
+            
+            j+=1
+        i+=1
+mass = np.average(mass,axis=0)
+
+fig,ax1 = plt.subplots(1)
+ax1.scatter(np.log(sizes),np.log(mass),color='black', marker='x')
+def f(x,m,c):
+    return m*x + c
+ppot,pcov = opt.curve_fit(f,np.log(sizes),np.log(mass))
+err = np.sqrt(np.diag(pcov))
+print(ppot[0],err[0])
+
+ax1.plot(np.log(sizes),f(np.log(sizes),*ppot),color='black', marker='')
+
+ax1.set_xlabel('log(L)', fontsize="22")
+ax1.set_ylabel('log(M(L))', fontsize="22")
+
+ax1.tick_params(axis="x", labelsize=18)
+ax1.tick_params(axis="y", labelsize=18)
 plt.show()
