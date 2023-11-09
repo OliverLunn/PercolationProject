@@ -55,7 +55,9 @@ def plot(G,axis,title):
     pos = {node:G.nodes[node]['pos'] for node in G}
     node_colors = [G.nodes[node]['occupied'] for node in G.nodes]
     clusters = find_clusters(G)
-    nx.draw_networkx_nodes(G, pos=pos, node_color=node_colors, cmap=plt.get_cmap('winter'), node_size=25, ax=axis)
+    nx.draw_networkx_nodes(G, pos=pos, node_color='black', node_shape='o', node_size=60, ax=axis)
+    nx.draw_networkx_nodes(G, pos=pos, node_color=node_colors, node_shape='o', cmap=plt.get_cmap('binary'), node_size=25, ax=axis)
+    
     for i, cluster in enumerate(clusters):
         cluster_edges = G.subgraph(cluster).edges()
         nx.draw_networkx_edges(G, pos=pos, edgelist=cluster_edges, edge_color='black',style='solid',width=1.5,ax=axis)
@@ -192,7 +194,7 @@ def f2(x,gamma):
     return (np.abs(x-0.5))**(-gamma)
 #========================================START OF CODE============================================
 
-case = 's'
+case = 'd'
 if case == 's_slider':
     probs=np.arange(0.1,0.7,0.005)
     m=125
@@ -368,15 +370,17 @@ if case == 's':
 
 if case == 'r':
     p=0.5
-    m=12
-    n=12
+    m=16
+    n=26
     G = nx.triangular_lattice_graph(m,n)
     G = assign_random_numbers(G)
     G = occupied(G,p)
 
-    H = renormalise(G,m,n)
-    fig, (ax1,ax2) = plt.subplots(1,2)
-    plot(G,ax1,'origional lattice')
-    plot(H,ax2,'renormalised lattice')
+    #H = renormalise(G,m,n)
+    fig, (ax1) = plt.subplots(1)
+    plot(G,ax1,'')
+    #plot(H,ax2,'renormalised lattice')
+
+
 
 plt.show()
