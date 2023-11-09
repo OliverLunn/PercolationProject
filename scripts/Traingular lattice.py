@@ -192,7 +192,7 @@ def f2(x,gamma):
     return (np.abs(x-0.5))**(-gamma)
 #========================================START OF CODE============================================
 
-case = 'd'
+case = 'r'
 
 if case == 'p':
 
@@ -288,16 +288,16 @@ if case == 's':
 
 if case == 'r':
     p=0.5
-    m=12
-    n=7
+    m=25
+    n=50
     G = nx.triangular_lattice_graph(m,n)
     G = assign_random_numbers(G)
     G = occupied(G,p)
 
     H = renormalise(G,m,n)
-    fig, (ax1,ax2) = plt.subplots(1,2)
+    fig, (ax1) = plt.subplots(1)
     plot(G,ax1,'origional lattice')
-    plot(H,ax2,'renormalised lattice')
+    #plot(H,ax2,'renormalised lattice')
 
 plt.show()
 def convert_lattice(G,m,n):

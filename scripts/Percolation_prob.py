@@ -25,7 +25,7 @@ for size in sizes:
     
     perc_prob[j,:] = perc_prob[j,:]/runs
     j+=1
-np.savetxt('data\\percolation probabilty.txt',perc_prob)
+np.savetxt('data/percolation probabilty.txt',perc_prob)
 
 fig,(ax1) = plt.subplots(1,1)
 colors=['red','orange','yellow','green','blue','purple']
