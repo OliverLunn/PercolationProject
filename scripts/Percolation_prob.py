@@ -8,7 +8,7 @@ from main import Percolation2D
 percolation2D = Percolation2D()
 
 sizes = [50,75,100,150,200,250]
-probs=np.linspace(0.4,0.75,50)
+probs=np.linspace(0.4,0.75,100)
 
 perc_prob = np.zeros((len(sizes),len(probs)))
 
