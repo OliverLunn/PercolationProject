@@ -55,7 +55,9 @@ def plot(G,axis,title):
     pos = {node:G.nodes[node]['pos'] for node in G}
     node_colors = [G.nodes[node]['occupied'] for node in G.nodes]
     clusters = find_clusters(G)
-    nx.draw_networkx_nodes(G, pos=pos, node_color=node_colors, cmap=plt.get_cmap('winter'), node_size=25, ax=axis)
+    nx.draw_networkx_nodes(G, pos=pos, node_color='black', node_shape='o', node_size=60, ax=axis)
+    nx.draw_networkx_nodes(G, pos=pos, node_color=node_colors, node_shape='o', cmap=plt.get_cmap('binary'), node_size=25, ax=axis)
+    
     for i, cluster in enumerate(clusters):
         cluster_edges = G.subgraph(cluster).edges()
         nx.draw_networkx_edges(G, pos=pos, edgelist=cluster_edges, edge_color='black',style='solid',width=1.5,ax=axis)
